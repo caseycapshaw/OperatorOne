@@ -433,6 +433,24 @@ User Message → Supervisor (Operator One)
 
 ---
 
+## Git & GitHub
+
+| Setting | Value |
+|---------|-------|
+| Repo | `caseycapshaw/OperatorOne` (private) |
+| Remote | `git@github.com-caseycapshaw:caseycapshaw/OperatorOne.git` |
+| Branch | `main` |
+| User | Casey Capshaw / casey@caseycapshaw.com |
+| Signing | SSH via 1Password (`op-ssh-sign`), key `ssh-ed25519 AAAAC3...07Xr4` |
+
+The `github.com-caseycapshaw` SSH host alias is defined in `~/.ssh/config` and routes through 1Password's SSH agent with the correct key. The `gh` CLI authenticates as `caseycapshaw` via OAuth token.
+
+**Gitignored sensitive files:** `.env`, `.mcp.json`, `NEXT_STEPS.md`, `backups/`, `logs/`
+
+**Legacy naming note:** Some env vars still use `PORTAL_` prefix (e.g., `PORTAL_AUTH_SECRET`, `POSTGRES_PORTAL_PASSWORD`). These are functional in docker-compose and setup code. Renaming to `CONSOLE_*` is a recommended follow-up.
+
+---
+
 ## Conventions
 
 - **Module compose files** layer onto the base with `-f` flags
