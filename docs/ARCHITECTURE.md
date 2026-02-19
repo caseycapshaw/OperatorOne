@@ -230,7 +230,7 @@ The MCP config file defines the **target architecture** for additional MCP serve
 
 **Tech Stack:**
 - **Framework:** Next.js 15 (App Router, Server Components, Server Actions)
-- **AI:** Vercel AI SDK v6 (`ai`, `@ai-sdk/anthropic`, `@ai-sdk/react`) with Claude
+- **AI:** Vercel AI SDK v6 (`ai`, `@ai-sdk/anthropic`, `@openrouter/ai-sdk-provider`, `@ai-sdk/react`) with Claude via Anthropic or OpenRouter
 - **Auth:** Auth.js v5 with Authentik OIDC provider
 - **ORM:** Drizzle (type-safe, no binary engine, Docker-friendly)
 - **UI:** Tron/cyberpunk aesthetic (thegridcn-inspired) built on shadcn/ui + Tailwind CSS 4
@@ -273,6 +273,7 @@ User Message → Supervisor (Operator One)
 - **Proactive triage**: fire-and-forget `generateText` call when requests/tickets are created, auto-adds AI comment
 - **Role hierarchy**: viewer → member → admin → owner, each level unlocks more tools
 - Configurable model via `AI_MODEL` env var (default: `claude-sonnet-4-5-20250929`)
+- **Switchable AI provider** via `AI_PROVIDER` env var (`anthropic` or `openrouter`)
 
 **Key Design Decisions:**
 - Uses `web-chain@file` middleware (NOT `authentik-auth@file`). The console handles its own auth via OAuth2; forward auth would double-authenticate.
@@ -280,6 +281,7 @@ User Message → Supervisor (Operator One)
 - In dev, OIDC discovery URLs use `authentik-server:9000` (Docker-internal) while the authorization redirect uses `auth.localhost` (browser-facing). Same pattern as Grafana OAuth.
 - AI tools are plain async functions inside the API route (not MCP clients) for simplicity.
 - Dangerous operations (apply_update, rollback) are NOT exposed through chat — they keep their Slack approval flow.
+- Provider-agnostic `ModelFactory` pattern (`provider.ts`) decouples all agent code from any specific AI SDK provider. Consumers call `getModelFactory()` which returns a `(modelId: string) => LanguageModel` function. When OpenRouter is active, bare Claude model IDs are auto-prefixed with `anthropic/` so existing agent definitions, `AI_MODEL`, and `modelOverride` work unchanged.
 
 **Setup Wizard:**
 The console includes a first-boot setup wizard that detects missing OAuth configuration (`PORTAL_OAUTH_CLIENT_ID` empty) and redirects to `/setup`. The 5-step wizard authenticates via bootstrap password, captures organization identity (name, domain, operator name/email), auto-creates OAuth2 providers in Authentik using its REST API, collects optional service credentials (Anthropic, SMTP, Slack), writes everything to `.env`, and restarts affected containers via the admin MCP server's `POST /tools/restart-services` endpoint. Organization identity is stored in `setup_config.org_identity` and applied on the first user login (used to create the org record with proper name/slug/domain instead of defaults). After completion, the `setup_config` table is marked complete and the wizard returns 403 on all subsequent requests.
@@ -505,7 +507,7 @@ User Message
      │
      ▼
 ┌─────────────────────────────────────────┐
-│           LLM (Claude API)               │
+│     LLM (Anthropic or OpenRouter)        │
 │  + System Prompt (business context)      │
 │  + MCP Tool Definitions                  │
 │  + Conversation History                  │
@@ -602,7 +604,7 @@ open https://console.client-domain.com
 # - Enter bootstrap password from .env
 # - Set organization name, domain, and operator details
 # - Wizard auto-creates OAuth2 providers in Authentik
-# - Optionally enter Anthropic API key, SMTP, Slack webhook
+# - Choose AI provider (Anthropic direct or OpenRouter) and enter API key
 # - Wizard writes credentials to .env and restarts services
 
 # 7. Initialize OpenBao (first-time only)
@@ -645,11 +647,15 @@ open https://automation.client-domain.com
 
 ### AI API Costs
 
-| Usage Level | Claude API Cost | Notes |
-|-------------|----------------|-------|
-| Light (100 queries/day) | $50-100 | Claude Sonnet |
-| Medium (500 queries/day) | $200-400 | Claude Sonnet |
-| Heavy (2000 queries/day) | $500-1000 | Consider caching |
+Two provider options — pricing is similar since OpenRouter passes through Anthropic rates plus a small margin:
+
+| Usage Level | Anthropic Direct | OpenRouter | Notes |
+|-------------|-----------------|------------|-------|
+| Light (100 queries/day) | $50-100 | $50-110 | Claude Sonnet |
+| Medium (500 queries/day) | $200-400 | $210-420 | Claude Sonnet |
+| Heavy (2000 queries/day) | $500-1000 | $525-1050 | Consider caching |
+
+OpenRouter adds ~5% margin but simplifies billing (single account for 300+ models). Set `AI_PROVIDER=openrouter` in `.env` to switch.
 
 ### Total Cost Range
 
