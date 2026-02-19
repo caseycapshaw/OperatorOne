@@ -158,7 +158,7 @@ modules/<name>/
 - Drizzle ORM with 16-table PostgreSQL schema
 - Tron/cyberpunk UI theme (thegridcn-inspired, shadcn/ui base)
 - Features: AI chat, service requests, projects/milestones, tickets, documents, activity log
-- **Status: Running, SSO working, AI agent built (needs ANTHROPIC_API_KEY in .env)**
+- **Status: Running, SSO working, AI agent built (needs API key — see AI Provider section)**
 
 ---
 
@@ -181,6 +181,23 @@ modules/<name>/
 - `modules/console/app/src/db/schema.ts` — All table/enum definitions with type exports
 - `modules/console/app/src/styles/globals.css` — Tron theme CSS variables, glow animations, grid background
 - `modules/console/app/src/app/dashboard/` — All dashboard pages
+
+### AI Provider Pattern
+
+The AI system supports two backends, switchable via `AI_PROVIDER` env var:
+
+| Provider | Env Var | Key Format | Key Secret Path |
+|----------|---------|------------|-----------------|
+| `anthropic` (default) | `ANTHROPIC_API_KEY` | `sk-ant-...` | `services/anthropic` |
+| `openrouter` | `OPENROUTER_API_KEY` | `sk-or-...` | `services/openrouter` |
+
+**How it works:**
+- `provider.ts` exports a `ModelFactory` type: `(modelId: string) => LanguageModel`
+- `getModelFactory()` reads `AI_PROVIDER`, resolves the API key (OpenBao-first, env-fallback), and returns the appropriate factory
+- When OpenRouter is active, bare Claude model IDs (e.g. `claude-sonnet-4-5-20250929`) are auto-prefixed with `anthropic/` so existing agent definitions, `AI_MODEL`, and `modelOverride` all work unchanged
+- All consumers (supervisor, agent-factory, agent-registry, triage, chat route) use `ModelFactory` — no Anthropic-specific types leak outside `provider.ts`
+- Admin integrations page shows both provider cards with active indicator
+- Setup wizard Step 4 has an Anthropic/OpenRouter toggle
 
 ### AI Agent Architecture (Supervisor/Delegation Pattern)
 
@@ -224,6 +241,7 @@ User Message → Supervisor (Operator One)
 - `tool-registry.ts`: centralized catalog mapping tool names → implementations with role enforcement
 
 ### AI Agent Files
+- `modules/console/app/src/lib/ai/provider.ts` — Provider-agnostic ModelFactory, getModelFactory(), getActiveProvider()
 - `modules/console/app/src/lib/ai/agents/supervisor.ts` — Creates supervisor ToolLoopAgent with delegation tools
 - `modules/console/app/src/lib/ai/agents/agent-registry.ts` — Loads agents, builds delegation tools, handles DB overrides
 - `modules/console/app/src/lib/ai/agents/agent-factory.ts` — Creates sub-agent ToolLoopAgent with resolved tools + skills
@@ -360,7 +378,7 @@ User Message → Supervisor (Operator One)
 - **Dev setup:** `OPENBAO_ADDR` and `OPENBAO_SERVICE_TOKEN` are set in the base `modules/console/docker-compose.yml` and inherited by dev via Docker Compose merge. If `OPENBAO_SERVICE_TOKEN` is empty in `.env` (before running `init-openbao.sh`), OpenBao reads will fail silently and all secrets fall back to env vars.
 - **Prod setup:** Run `scripts/init-openbao.sh` first to initialize vault, enable KV v2, create policy, and generate a service token. Add `OPENBAO_SERVICE_TOKEN` to `.env`, then restart console.
 - **Key files:** `modules/console/app/src/lib/openbao.ts` (HTTP client), `modules/console/app/src/lib/secrets.ts` (OpenBao-first, env-fallback reader)
-- Secrets stored at paths like `services/anthropic`, `services/n8n` in OpenBao KV v2
+- Secrets stored at paths like `services/anthropic`, `services/openrouter`, `services/n8n` in OpenBao KV v2
 - Admin page at `/dashboard/admin` can write secrets to OpenBao via the console UI
 
 ### Tailwind CSS 4
@@ -371,7 +389,7 @@ User Message → Supervisor (Operator One)
 
 ## What's Not Done Yet (Priority Order)
 
-1. **Add ANTHROPIC_API_KEY** — AI agent is built, just needs the API key in .env to start responding
+1. **Add AI API key** — Set `ANTHROPIC_API_KEY` (direct) or `OPENROUTER_API_KEY` + `AI_PROVIDER=openrouter` in .env to start the AI agent
 2. **Generate N8N_API_KEY** — n8n Settings → API → Generate key, add to .env for workflow tools
 3. **Slack integration** — Create Slack app, set SLACK_WEBHOOK_URL + SLACK_SIGNING_SECRET for approval flow
 4. **Deploy to VPS** — Point domain, configure prod .env, run prod compose
@@ -407,6 +425,7 @@ User Message → Supervisor (Operator One)
 | Console queries | `modules/console/app/src/lib/queries.ts` |
 | Console server actions | `modules/console/app/src/lib/actions.ts` |
 | Console theme CSS | `modules/console/app/src/styles/globals.css` |
+| AI provider factory | `modules/console/app/src/lib/ai/provider.ts` |
 | AI agent tools | `modules/console/app/src/lib/ai/tools/` |
 | AI agent definitions | `modules/console/app/src/lib/ai/agents/` |
 | AI supervisor | `modules/console/app/src/lib/ai/agents/supervisor.ts` |
@@ -423,7 +442,9 @@ User Message → Supervisor (Operator One)
 | Setup utilities | `modules/console/app/src/lib/setup.ts` |
 | Setup apply API | `modules/console/app/src/app/api/setup/apply/route.ts` |
 | Admin page | `modules/console/app/src/app/dashboard/admin/page.tsx` |
+| Admin integrations component | `modules/console/app/src/components/console/admin-integrations.tsx` |
 | Admin form component | `modules/console/app/src/components/console/admin-form.tsx` |
+| Admin secrets API | `modules/console/app/src/app/api/admin/secrets/route.ts` |
 | Admin API route | `modules/console/app/src/app/api/admin/organization/route.ts` |
 | SSO setup guide | `docs/sso-setup.md` |
 | Architecture doc | `docs/ARCHITECTURE.md` |
