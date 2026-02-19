@@ -1,5 +1,5 @@
 import { ToolLoopAgent, stepCountIs } from "ai";
-import type { AnthropicProvider } from "@ai-sdk/anthropic";
+import type { ModelFactory } from "@/lib/ai/provider";
 import { resolveTools } from "./tool-registry";
 import type { AgentDefinition, AgentContext } from "./types";
 import { db } from "@/lib/db";
@@ -12,7 +12,7 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
 
-export async function createSubAgent(definition: AgentDefinition, ctx: AgentContext, provider: AnthropicProvider) {
+export async function createSubAgent(definition: AgentDefinition, ctx: AgentContext, provider: ModelFactory) {
   const tools = resolveTools(definition.allowedTools, ctx, definition.toolSettings);
   const model = definition.modelOverride || DEFAULT_MODEL;
 

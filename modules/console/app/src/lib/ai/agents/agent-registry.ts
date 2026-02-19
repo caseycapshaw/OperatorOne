@@ -1,6 +1,6 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
-import type { AnthropicProvider } from "@ai-sdk/anthropic";
+import type { ModelFactory } from "@/lib/ai/provider";
 import { db } from "@/lib/db";
 import { agents } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -104,7 +104,7 @@ export async function getAvailableAgents(
 export function buildDelegationTools(
   availableAgents: AgentDefinition[],
   ctx: AgentContext,
-  provider: AnthropicProvider,
+  provider: ModelFactory,
 ) {
   const delegationTools: ToolSet = {};
 

@@ -16,10 +16,12 @@ interface KeyStatus {
 interface SecretsResponse {
   anthropicApiKey: KeyStatus;
   n8nApiKey: KeyStatus;
+  openrouterApiKey: KeyStatus;
+  aiProvider: "anthropic" | "openrouter";
   openbaoAvailable: boolean;
 }
 
-type ModalId = "anthropic" | "n8n" | "slack" | "email" | "sms" | null;
+type ModalId = "anthropic" | "openrouter" | "n8n" | "slack" | "email" | "sms" | null;
 
 /* ── Key Settings Form (reused inside modals) ─ */
 
@@ -180,25 +182,50 @@ export function AdminIntegrations() {
   }, []);
 
   const anthropicStatus = secrets?.anthropicApiKey;
+  const openrouterStatus = secrets?.openrouterApiKey;
   const n8nStatus = secrets?.n8nApiKey;
+  const activeProvider = secrets?.aiProvider ?? "anthropic";
 
   return (
     <>
       {/* ── Agents & LLMs ─────────────────────── */}
       <HudFrame title="Agents & LLMs">
+        {/* Active provider indicator */}
+        <div className="mb-3 flex items-center gap-2 text-xs text-text-muted">
+          <span>Active provider:</span>
+          <span className="font-medium uppercase tracking-wider text-neon-cyan">
+            {activeProvider === "openrouter" ? "OpenRouter" : "Anthropic"}
+          </span>
+          <span className="text-text-muted/40">
+            (set via AI_PROVIDER env var)
+          </span>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <IntegrationCard
             name="Anthropic"
-            subtitle="Claude AI models"
+            subtitle="Claude AI models (direct)"
             icon="A"
             accentColor="var(--color-neon-orange)"
             status={anthropicStatus?.configured ? "configured" : "not-configured"}
             statusLabel={
               anthropicStatus?.configured
-                ? `Connected (${anthropicStatus.source === "openbao" ? "OpenBao" : "ENV"})`
+                ? `Connected (${anthropicStatus.source === "openbao" ? "OpenBao" : "ENV"})${activeProvider === "anthropic" ? " · Active" : ""}`
                 : "Not configured"
             }
             onClick={() => setActiveModal("anthropic")}
+          />
+          <IntegrationCard
+            name="OpenRouter"
+            subtitle="Claude via OpenRouter"
+            icon="OR"
+            accentColor="var(--color-neon-purple)"
+            status={openrouterStatus?.configured ? "configured" : "not-configured"}
+            statusLabel={
+              openrouterStatus?.configured
+                ? `Connected (${openrouterStatus.source === "openbao" ? "OpenBao" : "ENV"})${activeProvider === "openrouter" ? " · Active" : ""}`
+                : "Not configured"
+            }
+            onClick={() => setActiveModal("openrouter")}
           />
           <AddCard label="Add Agent" />
         </div>
@@ -262,14 +289,89 @@ export function AdminIntegrations() {
         title="Anthropic Settings"
         accentColor="var(--color-neon-orange)"
       >
-        <KeySettingsForm
-          label="API Key"
-          placeholder="sk-ant-..."
-          bodyKey="anthropicApiKey"
-          status={anthropicStatus ?? null}
-          openbaoAvailable={secrets?.openbaoAvailable ?? false}
-          onSaved={fetchSecrets}
-        />
+        <div className="space-y-5">
+          <div className="space-y-2 border border-grid-border bg-grid-black/30 p-3">
+            <p className="text-xs text-text-muted">
+              Operator One uses a <span className="text-text-primary">developer API key</span> from
+              Anthropic to power the AI agent. A Claude Pro/Max chat subscription
+              cannot be used &mdash; Anthropic keeps chat subscriptions and API
+              access separate.
+            </p>
+            <p className="text-xs text-text-muted">
+              Get a key at{" "}
+              <a
+                href="https://console.anthropic.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neon-cyan underline"
+              >
+                console.anthropic.com
+              </a>
+              {" "}&rarr; API Keys &rarr; Create Key
+            </p>
+            <div className="flex items-center gap-2 border-t border-grid-border pt-2">
+              <span className="text-[10px] uppercase tracking-widest text-text-muted/60">
+                Est. cost
+              </span>
+              <span className="text-xs text-text-muted">
+                $5&ndash;$20/mo typical &middot; Sonnet: $3/$15 per 1M tokens (in/out)
+              </span>
+            </div>
+          </div>
+          <KeySettingsForm
+            label="API Key"
+            placeholder="sk-ant-..."
+            bodyKey="anthropicApiKey"
+            status={anthropicStatus ?? null}
+            openbaoAvailable={secrets?.openbaoAvailable ?? false}
+            onSaved={fetchSecrets}
+          />
+        </div>
+      </SettingsModal>
+
+      <SettingsModal
+        open={activeModal === "openrouter"}
+        onClose={() => setActiveModal(null)}
+        title="OpenRouter Settings"
+        accentColor="var(--color-neon-purple)"
+      >
+        <div className="space-y-5">
+          <div className="space-y-2 border border-grid-border bg-grid-black/30 p-3">
+            <p className="text-xs text-text-muted">
+              <span className="text-text-primary">OpenRouter</span> is an alternative
+              way to access Claude models. Instead of managing an Anthropic developer
+              account directly, you pay through OpenRouter&apos;s unified billing.
+            </p>
+            <p className="text-xs text-text-muted">
+              Get a key at{" "}
+              <a
+                href="https://openrouter.ai/keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neon-cyan underline"
+              >
+                openrouter.ai/keys
+              </a>
+            </p>
+            <div className="space-y-1 border-t border-grid-border pt-2">
+              <p className="text-[10px] uppercase tracking-widest text-text-muted/60">
+                To activate
+              </p>
+              <p className="text-xs text-text-muted">
+                Set <span className="font-mono text-text-primary">AI_PROVIDER=openrouter</span> in
+                your .env file and restart the console container.
+              </p>
+            </div>
+          </div>
+          <KeySettingsForm
+            label="API Key"
+            placeholder="sk-or-..."
+            bodyKey="openrouterApiKey"
+            status={openrouterStatus ?? null}
+            openbaoAvailable={secrets?.openbaoAvailable ?? false}
+            onSaved={fetchSecrets}
+          />
+        </div>
       </SettingsModal>
 
       <SettingsModal

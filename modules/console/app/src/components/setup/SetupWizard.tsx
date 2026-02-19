@@ -36,7 +36,9 @@ export function SetupWizard() {
   const [providers, setProviders] = useState<ProviderResult | null>(null);
 
   // Step 4: External services
+  const [aiProvider, setAiProvider] = useState<"anthropic" | "openrouter">("anthropic");
   const [anthropicKey, setAnthropicKey] = useState("");
+  const [openrouterKey, setOpenrouterKey] = useState("");
   const [smtpHost, setSmtpHost] = useState("");
   const [smtpPort, setSmtpPort] = useState("587");
   const [smtpUser, setSmtpUser] = useState("");
@@ -128,7 +130,9 @@ export function SetupWizard() {
           orgDomain: orgDomain || undefined,
           operatorName: operatorName || undefined,
           operatorEmail: operatorEmail || undefined,
+          aiProvider: aiProvider !== "anthropic" ? aiProvider : undefined,
           anthropicApiKey: anthropicKey || undefined,
+          openrouterApiKey: openrouterKey || undefined,
           smtpHost: smtpHost || undefined,
           smtpPort: smtpPort || undefined,
           smtpUser: smtpUser || undefined,
@@ -147,7 +151,7 @@ export function SetupWizard() {
     } finally {
       setApplyLoading(false);
     }
-  }, [providers, token, orgName, orgDomain, operatorName, operatorEmail, anthropicKey, smtpHost, smtpPort, smtpUser, smtpPass, slackWebhook]);
+  }, [providers, token, orgName, orgDomain, operatorName, operatorEmail, aiProvider, anthropicKey, openrouterKey, smtpHost, smtpPort, smtpUser, smtpPass, slackWebhook]);
 
   const orgIdentityValid = orgName && orgDomain && operatorName && operatorEmail;
 
@@ -392,18 +396,122 @@ export function SetupWizard() {
           </div>
 
           <div className="space-y-3">
+            {/* AI Provider toggle */}
             <div>
-              <label className="mb-1 block text-xs text-text-muted">
-                Anthropic API Key
+              <label className="mb-2 block text-xs text-text-muted">
+                AI Provider
               </label>
-              <input
-                type="password"
-                value={anthropicKey}
-                onChange={(e) => setAnthropicKey(e.target.value)}
-                className="w-full border border-grid-border bg-grid-panel px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-neon-cyan"
-                placeholder="sk-ant-..."
-              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setAiProvider("anthropic")}
+                  className={`flex-1 border px-3 py-2 text-xs font-medium uppercase tracking-widest transition-all ${
+                    aiProvider === "anthropic"
+                      ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan"
+                      : "border-grid-border text-text-muted hover:border-grid-border/80"
+                  }`}
+                >
+                  Anthropic (Direct)
+                </button>
+                <button
+                  onClick={() => setAiProvider("openrouter")}
+                  className={`flex-1 border px-3 py-2 text-xs font-medium uppercase tracking-widest transition-all ${
+                    aiProvider === "openrouter"
+                      ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan"
+                      : "border-grid-border text-text-muted hover:border-grid-border/80"
+                  }`}
+                >
+                  OpenRouter
+                </button>
+              </div>
             </div>
+
+            {/* Anthropic key input */}
+            {aiProvider === "anthropic" && (
+              <div>
+                <label className="mb-1 block text-xs text-text-muted">
+                  Anthropic API Key
+                </label>
+                <input
+                  type="password"
+                  value={anthropicKey}
+                  onChange={(e) => setAnthropicKey(e.target.value)}
+                  className="w-full border border-grid-border bg-grid-panel px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-neon-cyan"
+                  placeholder="sk-ant-..."
+                />
+                <div className="mt-2 space-y-2 border border-grid-border bg-grid-black/30 p-3">
+                  <p className="text-xs text-text-muted">
+                    OperatorOne requires a <span className="text-text-primary">developer API key</span> from Anthropic.
+                    A Claude Pro/Max subscription cannot be used &mdash; Anthropic keeps
+                    chat subscriptions and API access separate.
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    To get a key:
+                  </p>
+                  <ol className="list-inside list-decimal space-y-0.5 text-xs text-text-muted">
+                    <li>
+                      Go to{" "}
+                      <a
+                        href="https://console.anthropic.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neon-cyan underline"
+                      >
+                        console.anthropic.com
+                      </a>
+                    </li>
+                    <li>Sign up or log in, then add a payment method</li>
+                    <li>Navigate to <span className="text-text-primary">API Keys</span> and create a new key</li>
+                    <li>Paste the <span className="font-mono text-text-primary">sk-ant-...</span> key above</li>
+                  </ol>
+                  <p className="mt-1 text-[10px] text-text-muted/60">
+                    Typical cost for a small business: $5&ndash;$20/month.
+                    Claude Sonnet is $3 per 1M input tokens and $15 per 1M output tokens.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* OpenRouter key input */}
+            {aiProvider === "openrouter" && (
+              <div>
+                <label className="mb-1 block text-xs text-text-muted">
+                  OpenRouter API Key
+                </label>
+                <input
+                  type="password"
+                  value={openrouterKey}
+                  onChange={(e) => setOpenrouterKey(e.target.value)}
+                  className="w-full border border-grid-border bg-grid-panel px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-neon-cyan"
+                  placeholder="sk-or-..."
+                />
+                <div className="mt-2 space-y-2 border border-grid-border bg-grid-black/30 p-3">
+                  <p className="text-xs text-text-muted">
+                    <span className="text-text-primary">OpenRouter</span> lets you access
+                    Claude models through unified billing instead of managing a
+                    separate Anthropic developer account.
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    To get a key:
+                  </p>
+                  <ol className="list-inside list-decimal space-y-0.5 text-xs text-text-muted">
+                    <li>
+                      Go to{" "}
+                      <a
+                        href="https://openrouter.ai/keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neon-cyan underline"
+                      >
+                        openrouter.ai/keys
+                      </a>
+                    </li>
+                    <li>Sign up or log in, then add credits</li>
+                    <li>Create a new API key</li>
+                    <li>Paste the <span className="font-mono text-text-primary">sk-or-...</span> key above</li>
+                  </ol>
+                </div>
+              </div>
+            )}
 
             <details className="group">
               <summary className="cursor-pointer text-xs text-text-muted hover:text-neon-cyan">
@@ -501,9 +609,23 @@ export function SetupWizard() {
               <span className="text-green-400">configured</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-muted">Anthropic API</span>
-              <span className={anthropicKey ? "text-green-400" : "text-text-muted"}>
-                {anthropicKey ? "configured" : "skipped"}
+              <span className="text-text-muted">AI Provider</span>
+              <span className="text-text-primary">
+                {aiProvider === "openrouter" ? "OpenRouter" : "Anthropic"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-text-muted">
+                {aiProvider === "openrouter" ? "OpenRouter API" : "Anthropic API"}
+              </span>
+              <span className={
+                (aiProvider === "openrouter" ? openrouterKey : anthropicKey)
+                  ? "text-green-400"
+                  : "text-text-muted"
+              }>
+                {(aiProvider === "openrouter" ? openrouterKey : anthropicKey)
+                  ? "configured"
+                  : "skipped"}
               </span>
             </div>
             <div className="flex justify-between">

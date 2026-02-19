@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { getAnthropicProvider } from "@/lib/ai/provider";
+import { getModelFactory } from "@/lib/ai/provider";
 import { db } from "@/lib/db";
 import {
   requests,
@@ -63,7 +63,7 @@ ${entityType === "request" ? `Category: ${entity.category}` : ""}
 Recent activity: ${recentActivity.map((a) => a.title).join("; ")}`;
 
   try {
-    const provider = await getAnthropicProvider();
+    const provider = await getModelFactory();
     const { text } = await generateText({
       model: provider(model),
       system: systemPrompt,

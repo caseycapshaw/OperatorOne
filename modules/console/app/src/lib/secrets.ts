@@ -34,6 +34,14 @@ export async function getN8nApiKey(): Promise<string | undefined> {
   return process.env.N8N_API_KEY || undefined;
 }
 
+export async function getOpenRouterApiKey(): Promise<string | undefined> {
+  if (await isOpenBaoAvailable()) {
+    const secret = await readSecret("services/openrouter");
+    if (secret?.api_key) return secret.api_key;
+  }
+  return process.env.OPENROUTER_API_KEY || undefined;
+}
+
 export async function getOpenBaoStatus(): Promise<boolean> {
   return isOpenBaoAvailable();
 }

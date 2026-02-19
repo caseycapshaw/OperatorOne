@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { readSecret, writeSecret, checkHealth } from "@/lib/openbao";
+import { getActiveProvider } from "@/lib/ai/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +29,14 @@ export async function GET() {
     let anthropicSource: "openbao" | "env" | "none" = "none";
     let n8nKey = "";
     let n8nSource: "openbao" | "env" | "none" = "none";
+    let openrouterKey = "";
+    let openrouterSource: "openbao" | "env" | "none" = "none";
 
     if (openbaoAvailable) {
-      const [anthropicSecret, n8nSecret] = await Promise.all([
+      const [anthropicSecret, n8nSecret, openrouterSecret] = await Promise.all([
         readSecret("services/anthropic"),
         readSecret("services/n8n"),
+        readSecret("services/openrouter"),
       ]);
       if (anthropicSecret?.api_key) {
         anthropicKey = anthropicSecret.api_key;
@@ -41,6 +45,10 @@ export async function GET() {
       if (n8nSecret?.api_key) {
         n8nKey = n8nSecret.api_key;
         n8nSource = "openbao";
+      }
+      if (openrouterSecret?.api_key) {
+        openrouterKey = openrouterSecret.api_key;
+        openrouterSource = "openbao";
       }
     }
 
@@ -54,9 +62,16 @@ export async function GET() {
       n8nSource = "env";
     }
 
+    if (!openrouterKey && process.env.OPENROUTER_API_KEY) {
+      openrouterKey = process.env.OPENROUTER_API_KEY;
+      openrouterSource = "env";
+    }
+
     return NextResponse.json({
       anthropicApiKey: resolveKeyStatus(anthropicKey, anthropicSource),
       n8nApiKey: resolveKeyStatus(n8nKey, n8nSource),
+      openrouterApiKey: resolveKeyStatus(openrouterKey, openrouterSource),
+      aiProvider: getActiveProvider(),
       openbaoAvailable,
     });
   } catch {
@@ -71,6 +86,7 @@ export async function PATCH(request: Request) {
     const body = (await request.json()) as {
       anthropicApiKey?: string;
       n8nApiKey?: string;
+      openrouterApiKey?: string;
     };
 
     if (body.anthropicApiKey !== undefined) {
@@ -118,6 +134,39 @@ export async function PATCH(request: Request) {
       const openbaoAvailable = await checkHealth();
       if (openbaoAvailable) {
         const written = await writeSecret("services/n8n", { api_key: key });
+        if (!written) {
+          return NextResponse.json(
+            { error: "Failed to write secret to OpenBao" },
+            { status: 500 },
+          );
+        }
+        return NextResponse.json({ success: true, source: "openbao" });
+      }
+
+      return NextResponse.json(
+        { error: "OpenBao is not available. Cannot save secrets." },
+        { status: 503 },
+      );
+    }
+
+    if (body.openrouterApiKey !== undefined) {
+      const key = body.openrouterApiKey.trim();
+      if (!key) {
+        return NextResponse.json(
+          { error: "API key cannot be empty" },
+          { status: 400 },
+        );
+      }
+      if (!key.startsWith("sk-or-")) {
+        return NextResponse.json(
+          { error: "Invalid OpenRouter API key format (expected sk-or-... prefix)" },
+          { status: 400 },
+        );
+      }
+
+      const openbaoAvailable = await checkHealth();
+      if (openbaoAvailable) {
+        const written = await writeSecret("services/openrouter", { api_key: key });
         if (!written) {
           return NextResponse.json(
             { error: "Failed to write secret to OpenBao" },

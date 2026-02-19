@@ -1,5 +1,5 @@
 import { ToolLoopAgent, stepCountIs, type ToolSet } from "ai";
-import type { AnthropicProvider } from "@ai-sdk/anthropic";
+import type { ModelFactory } from "@/lib/ai/provider";
 import type { AgentDefinition, AgentContext } from "./types";
 
 const DEFAULT_MODEL = process.env.AI_MODEL || "claude-sonnet-4-5-20250929";
@@ -50,7 +50,7 @@ export function createSupervisor(
   delegationTools: ToolSet,
   availableAgents: AgentDefinition[],
   ctx: AgentContext,
-  provider: AnthropicProvider,
+  provider: ModelFactory,
   definition?: AgentDefinition,
 ) {
   const customInstructions = definition?.instructions;

@@ -2,7 +2,7 @@ import { createAgentUIStreamResponse, type UIMessage } from "ai";
 import { getChatSessionContext } from "@/lib/ai/session-context";
 import { getAvailableAgents, getSupervisorDefinition, buildDelegationTools } from "@/lib/ai/agents/agent-registry";
 import { createSupervisor } from "@/lib/ai/agents/supervisor";
-import { getAnthropicProvider } from "@/lib/ai/provider";
+import { getModelFactory } from "@/lib/ai/provider";
 import { db } from "@/lib/db";
 import { conversations, messages } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const provider = await getAnthropicProvider();
+  const provider = await getModelFactory();
 
   const body = await req.json();
   const { messages: chatMessages, conversationId } = body as {

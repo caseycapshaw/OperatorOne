@@ -15,7 +15,9 @@ interface ApplyBody {
   orgDomain?: string;
   operatorName?: string;
   operatorEmail?: string;
+  aiProvider?: "anthropic" | "openrouter";
   anthropicApiKey?: string;
+  openrouterApiKey?: string;
   smtpHost?: string;
   smtpPort?: string;
   smtpUser?: string;
@@ -81,9 +83,17 @@ export async function POST(request: Request) {
     envUpdates.GRAFANA_OAUTH_REDIRECT_URL =
       `${scheme}://monitor.${domain}/login/generic_oauth`;
 
+    // AI provider selection
+    if (body.aiProvider) {
+      envUpdates.AI_PROVIDER = body.aiProvider;
+    }
+
     // Optional services
     if (body.anthropicApiKey) {
       envUpdates.ANTHROPIC_API_KEY = body.anthropicApiKey;
+    }
+    if (body.openrouterApiKey) {
+      envUpdates.OPENROUTER_API_KEY = body.openrouterApiKey;
     }
     if (body.smtpHost) envUpdates.SMTP_HOST = body.smtpHost;
     if (body.smtpPort) envUpdates.SMTP_PORT = body.smtpPort;
@@ -96,11 +106,14 @@ export async function POST(request: Request) {
     // 1. Write .env file
     await updateEnvFile(envUpdates);
 
-    // 1b. Write Anthropic key to OpenBao if available
-    if (body.anthropicApiKey) {
-      const openbaoAvailable = await checkHealth();
-      if (openbaoAvailable) {
+    // 1b. Write API keys to OpenBao if available
+    const openbaoAvailable = await checkHealth();
+    if (openbaoAvailable) {
+      if (body.anthropicApiKey) {
         await writeSecret("services/anthropic", { api_key: body.anthropicApiKey });
+      }
+      if (body.openrouterApiKey) {
+        await writeSecret("services/openrouter", { api_key: body.openrouterApiKey });
       }
     }
 
