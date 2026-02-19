@@ -1,0 +1,56 @@
+# modules/console/docker-compose.dev.yml
+# Dev overrides: HTTP, hot-reload, Docker-internal auth URLs
+
+services:
+  console:
+    build:
+      context: ./modules/console/app
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./modules/console/app/src:/app/src
+      - ./modules/console/app/public:/app/public
+      - ./.env:/opt/op1/.env
+    environment:
+      - DATABASE_URL=postgresql://portal:${POSTGRES_PORTAL_PASSWORD}@postgres:5432/portal
+      - AUTH_SECRET=${PORTAL_AUTH_SECRET}
+      - AUTH_TRUST_HOST=true
+      - AUTH_URL=http://console.localhost
+      - AUTH_AUTHENTIK_ID=${PORTAL_OAUTH_CLIENT_ID}
+      - AUTH_AUTHENTIK_SECRET=${PORTAL_OAUTH_CLIENT_SECRET}
+      # Issuer must use Docker service name for OIDC discovery (server-to-server)
+      - AUTH_AUTHENTIK_ISSUER=http://authentik-server:9000/application/o/console/
+      # Token/userinfo are also server-to-server
+      - AUTH_AUTHENTIK_TOKEN_URL=http://authentik-server:9000/application/o/token/
+      - AUTH_AUTHENTIK_USERINFO_URL=http://authentik-server:9000/application/o/userinfo/
+      # Authorization URL is browser-facing (user's browser redirects here)
+      - AUTH_AUTHENTIK_AUTH_URL=http://auth.localhost/application/o/authorize/
+      # AI Agent
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AI_MODEL=${AI_MODEL:-claude-sonnet-4-5-20250929}
+      - N8N_API_URL=http://op1-n8n:5678/api/v1
+      - N8N_API_KEY=${N8N_API_KEY}
+      - ADMIN_MCP_URL=http://admin-mcp-server:3000
+      - ADMIN_MCP_TOKEN=${APPROVAL_API_TOKEN}
+      # Setup wizard
+      - SETUP_ENV_PATH=/opt/op1/.env
+      - AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}
+      - AUTHENTIK_BOOTSTRAP_TOKEN=dev-bootstrap-token
+      - AUTHENTIK_API_URL=http://authentik-server:9000
+      - DOMAIN=localhost
+    networks:
+      - op1-backend
+      - op1-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.console.rule=Host(`console.localhost`)"
+      - "traefik.http.routers.console.entrypoints=web"
+      - "traefik.http.routers.console.tls=false"
+      - "traefik.http.routers.console.middlewares=web-chain@file"
+      - "traefik.http.services.console.loadbalancer.server.port=3000"
+      - "traefik.docker.network=op1-frontend"
+
+networks:
+  op1-frontend:
+    external: true
+  op1-backend:
+    external: true

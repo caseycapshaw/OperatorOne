@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Local MCP config (contains user-specific paths)
+.mcp.json
+
+# Internal development notes
+NEXT_STEPS.md
+
+# Backups
+backups/
+
+# Logs
+logs/
+*.log
+
+# Generated version tracking
+versions.yml
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+
+# Certificates (local dev)
+*.pem
+*.key
+acme.json

@@ -1,0 +1,403 @@
+{
+  "name": "System Update Manager",
+  "nodes": [
+    {
+      "id": "trigger-schedule",
+      "name": "Weekly Update Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": ["monday"],
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "check-updates",
+      "name": "Check Available Updates",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [300, 300],
+      "parameters": {
+        "url": "http://admin-mcp-server:3000/tools/call",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "check_updates"
+            },
+            {
+              "name": "arguments",
+              "value": "{}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "filter-updates",
+      "name": "Filter Available Updates",
+      "type": "n8n-nodes-base.filter",
+      "position": [500, 300],
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.summary.updatesAvailable }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "split-updates",
+      "name": "Split by Update Type",
+      "type": "n8n-nodes-base.switch",
+      "position": [700, 300],
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "auto_update",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.autoUpdateEligible }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "needs_approval",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.requiresApproval }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "auto-apply-patch",
+      "name": "Auto-Apply Patch Updates",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 200],
+      "parameters": {
+        "url": "http://admin-mcp-server:3000/tools/call",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "apply_update"
+            },
+            {
+              "name": "arguments",
+              "value": "={{ JSON.stringify({ component: $json.component, version: $json.latest, reason: 'Automated patch update' }) }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "request-approval-slack",
+      "name": "Request Approval via Slack",
+      "type": "n8n-nodes-base.slack",
+      "position": [900, 400],
+      "parameters": {
+        "channel": "#op1-approvals",
+        "text": "",
+        "blocksUi": {
+          "blocksValues": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "🔄 *Update Available*\n\n*Component:* {{ $json.component }}\n*Current:* {{ $json.current }}\n*Available:* {{ $json.latest }}\n*Risk Level:* {{ $json.riskLevel }}"
+              }
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "<{{ $json.changelog }}|View Changelog>"
+              }
+            },
+            {
+              "type": "actions",
+              "elements": [
+                {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Approve Update"
+                  },
+                  "style": "primary",
+                  "action_id": "approve_update",
+                  "value": "{{ JSON.stringify({ component: $json.component, version: $json.latest }) }}"
+                },
+                {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Deny"
+                  },
+                  "style": "danger",
+                  "action_id": "deny_update",
+                  "value": "{{ JSON.stringify({ component: $json.component, version: $json.latest }) }}"
+                },
+                {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "⏰ Schedule"
+                  },
+                  "action_id": "schedule_update",
+                  "value": "{{ JSON.stringify({ component: $json.component, version: $json.latest }) }}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "log-auto-update",
+      "name": "Log Auto-Update Result",
+      "type": "n8n-nodes-base.slack",
+      "position": [1100, 200],
+      "parameters": {
+        "channel": "#op1-log",
+        "text": "✅ Auto-updated *{{ $json.component }}* from {{ $json.fromVersion }} to {{ $json.toVersion }}"
+      }
+    },
+    {
+      "id": "webhook-approval",
+      "name": "Slack Approval Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [100, 600],
+      "webhookId": "update-approval",
+      "parameters": {
+        "path": "update-approval",
+        "httpMethod": "POST"
+      }
+    },
+    {
+      "id": "parse-approval",
+      "name": "Parse Approval Action",
+      "type": "n8n-nodes-base.code",
+      "position": [300, 600],
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.payload;\nconst parsed = JSON.parse(payload);\nconst action = parsed.actions[0];\nconst value = JSON.parse(action.value);\n\nreturn {\n  action: action.action_id,\n  component: value.component,\n  version: value.version,\n  user: parsed.user.username,\n  responseUrl: parsed.response_url\n};"
+      }
+    },
+    {
+      "id": "switch-approval-action",
+      "name": "Handle Approval Decision",
+      "type": "n8n-nodes-base.switch",
+      "position": [500, 600],
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "outputKey": "approved",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "approve_update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "denied",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "deny_update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "schedule",
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "schedule_update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "execute-approved-update",
+      "name": "Execute Approved Update",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [700, 500],
+      "parameters": {
+        "url": "http://admin-mcp-server:3000/tools/call",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "apply_update"
+            },
+            {
+              "name": "arguments",
+              "value": "={{ JSON.stringify({ component: $json.component, version: $json.version, reason: 'Approved by ' + $json.user }) }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-update-complete",
+      "name": "Notify Update Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 500],
+      "parameters": {
+        "url": "={{ $('parse-approval').item.json.responseUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "replace_original",
+              "value": "true"
+            },
+            {
+              "name": "text",
+              "value": "✅ Update completed: {{ $json.component }} → {{ $json.toVersion }}\nApproved by: {{ $('parse-approval').item.json.user }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-denied",
+      "name": "Notify Update Denied",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [700, 700],
+      "parameters": {
+        "url": "={{ $json.responseUrl }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "replace_original",
+              "value": "true"
+            },
+            {
+              "name": "text",
+              "value": "❌ Update denied: {{ $json.component }}\nDenied by: {{ $json.user }}"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "trigger-schedule": {
+      "main": [
+        [{ "node": "check-updates", "type": "main", "index": 0 }]
+      ]
+    },
+    "check-updates": {
+      "main": [
+        [{ "node": "filter-updates", "type": "main", "index": 0 }]
+      ]
+    },
+    "filter-updates": {
+      "main": [
+        [{ "node": "split-updates", "type": "main", "index": 0 }]
+      ]
+    },
+    "split-updates": {
+      "auto_update": [
+        [{ "node": "auto-apply-patch", "type": "main", "index": 0 }]
+      ],
+      "needs_approval": [
+        [{ "node": "request-approval-slack", "type": "main", "index": 0 }]
+      ]
+    },
+    "auto-apply-patch": {
+      "main": [
+        [{ "node": "log-auto-update", "type": "main", "index": 0 }]
+      ]
+    },
+    "webhook-approval": {
+      "main": [
+        [{ "node": "parse-approval", "type": "main", "index": 0 }]
+      ]
+    },
+    "parse-approval": {
+      "main": [
+        [{ "node": "switch-approval-action", "type": "main", "index": 0 }]
+      ]
+    },
+    "switch-approval-action": {
+      "approved": [
+        [{ "node": "execute-approved-update", "type": "main", "index": 0 }]
+      ],
+      "denied": [
+        [{ "node": "notify-denied", "type": "main", "index": 0 }]
+      ]
+    },
+    "execute-approved-update": {
+      "main": [
+        [{ "node": "notify-update-complete", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

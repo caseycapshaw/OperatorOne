@@ -1,0 +1,18 @@
+{
+  "name": "@operatorone/admin-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI-administered system operations",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dockerode": "^4.0.0",
+    "express": "^4.21.0",
+    "yaml": "^2.3.0",
+    "semver": "^7.6.0"
+  }
+}

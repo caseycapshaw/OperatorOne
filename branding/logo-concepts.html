@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OperatorOne — Logo Concepts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #8888a0;
+    margin-bottom: 60px;
+  }
+
+  .concept-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .concept {
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 48px;
+    background: #0d0d14;
+  }
+
+  .concept-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #555570;
+    margin-bottom: 8px;
+  }
+
+  .concept-title {
+    font-size: 16px;
+    color: #00e5ff;
+    margin-bottom: 6px;
+  }
+
+  .concept-desc {
+    font-size: 12px;
+    color: #8888a0;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .logo-size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-size span {
+    font-size: 10px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .wordmark-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 20px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1a1a2e;
+    margin: 0;
+  }
+
+  .lockup-section {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid #1a1a2e;
+  }
+
+  .lockup-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+    margin-bottom: 24px;
+  }
+
+  .favicon-strip {
+    display: flex;
+    gap: 24px;
+    align-items: end;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid #1a1a2e;
+  }
+
+  .favicon-strip .logo-size span {
+    font-size: 9px;
+  }
+
+  /* Glow effect for hover */
+  svg:hover .glow-on-hover {
+    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.5));
+    transition: filter 0.3s ease;
+  }
+
+  svg .glow-on-hover {
+    transition: filter 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<h1>OperatorOne Logo Concepts</h1>
+
+<div class="concept-grid">
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT A: Power Symbol O1 -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept A</div>
+    <div class="concept-title">Power Symbol</div>
+    <div class="concept-desc">
+      The "O" is a power button circle. The "1" is the power line extending up from the gap — it IS the power symbol.
+      Meaning: turning on your operations. "Power up."
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Power circle (gap at top) -->
+            <path d="M 60 108 A 48 48 0 1 1 60 12" stroke="#00e5ff" stroke-width="3" fill="none" stroke-linecap="round"
+              transform="rotate(180, 60, 60)"/>
+            <!-- The "1" / power line -->
+            <line x1="60" y1="8" x2="60" y2="52" stroke="#e0e0e8" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-size">
+        <svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <path d="M 60 108 A 48 48 0 1 1 60 12" stroke="#00e5ff" stroke-width="4" fill="none" stroke-linecap="round"
+              transform="rotate(180, 60, 60)"/>
+            <line x1="60" y1="8" x2="60" y2="52" stroke="#e0e0e8" stroke-width="4" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <path d="M 60 108 A 48 48 0 1 1 60 12" stroke="#00e5ff" stroke-width="6" fill="none" stroke-linecap="round"
+              transform="rotate(180, 60, 60)"/>
+            <line x1="60" y1="8" x2="60" y2="52" stroke="#e0e0e8" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <!-- Favicon -->
+      <div class="logo-size">
+        <svg width="16" height="16" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <path d="M 60 108 A 48 48 0 1 1 60 12" stroke="#00e5ff" stroke-width="10" fill="none" stroke-linecap="round"
+              transform="rotate(180, 60, 60)"/>
+            <line x1="60" y1="4" x2="60" y2="52" stroke="#e0e0e8" stroke-width="10" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>16px</span>
+      </div>
+    </div>
+
+    <!-- Lockup with wordmark -->
+    <div class="lockup-section">
+      <div class="lockup-label">Lockup</div>
+      <div class="logo-row">
+        <svg width="360" height="48" viewBox="0 0 360 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Mark -->
+            <path d="M 24 44 A 20 20 0 1 1 24 4" stroke="#00e5ff" stroke-width="2.5" fill="none" stroke-linecap="round"
+              transform="rotate(180, 24, 24)"/>
+            <line x1="24" y1="2" x2="24" y2="20" stroke="#e0e0e8" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Wordmark -->
+            <text x="56" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="224" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT B: Scope / Reticle -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept B</div>
+    <div class="concept-title">Scope Reticle</div>
+    <div class="concept-desc">
+      The "O" is a targeting scope / reticle. The "1" is the vertical crosshair, extended.
+      Meaning: focused, precise, the operator has eyes on the target.
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Outer circle -->
+            <circle cx="60" cy="60" r="46" stroke="#00e5ff" stroke-width="2" fill="none"/>
+            <!-- Horizontal crosshair segments -->
+            <line x1="8" y1="60" x2="40" y2="60" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="80" y1="60" x2="112" y2="60" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Vertical "1" — the crosshair that becomes the one -->
+            <line x1="60" y1="4" x2="60" y2="116" stroke="#e0e0e8" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Center dot -->
+            <circle cx="60" cy="60" r="3" fill="#00e5ff"/>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-size">
+        <svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="60" cy="60" r="46" stroke="#00e5ff" stroke-width="3" fill="none"/>
+            <line x1="8" y1="60" x2="40" y2="60" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="80" y1="60" x2="112" y2="60" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="60" y1="4" x2="60" y2="116" stroke="#e0e0e8" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="4" fill="#00e5ff"/>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="60" cy="60" r="46" stroke="#00e5ff" stroke-width="5" fill="none"/>
+            <line x1="8" y1="60" x2="38" y2="60" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="82" y1="60" x2="112" y2="60" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="60" y1="4" x2="60" y2="116" stroke="#e0e0e8" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="6" fill="#00e5ff"/>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <!-- Favicon -->
+      <div class="logo-size">
+        <svg width="16" height="16" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="60" cy="60" r="44" stroke="#00e5ff" stroke-width="8" fill="none"/>
+            <line x1="60" y1="4" x2="60" y2="116" stroke="#e0e0e8" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="60" cy="60" r="8" fill="#00e5ff"/>
+          </g>
+        </svg>
+        <span>16px</span>
+      </div>
+    </div>
+
+    <!-- Lockup -->
+    <div class="lockup-section">
+      <div class="lockup-label">Lockup</div>
+      <div class="logo-row">
+        <svg width="380" height="48" viewBox="0 0 380 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Mark -->
+            <circle cx="24" cy="24" r="19" stroke="#00e5ff" stroke-width="1.5" fill="none"/>
+            <line x1="2" y1="24" x2="14" y2="24" stroke="#00e5ff" stroke-width="1" stroke-linecap="round"/>
+            <line x1="34" y1="24" x2="46" y2="24" stroke="#00e5ff" stroke-width="1" stroke-linecap="round"/>
+            <line x1="24" y1="2" x2="24" y2="46" stroke="#e0e0e8" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="24" cy="24" r="2" fill="#00e5ff"/>
+            <!-- Wordmark -->
+            <text x="60" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="228" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT C: Minimal Circle + Line -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept C</div>
+    <div class="concept-title">Circle + Line</div>
+    <div class="concept-desc">
+      Reduced to the absolute minimum. A thin circle and a vertical line to its right.
+      "O" and "1" as pure geometric forms. Clean, confident, no decoration.
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="140" height="120" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="52" cy="60" r="40" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+            <line x1="112" y1="16" x2="112" y2="104" stroke="#e0e0e8" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-size">
+        <svg width="75" height="64" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="52" cy="60" r="40" stroke="#00e5ff" stroke-width="3.5" fill="none"/>
+            <line x1="112" y1="16" x2="112" y2="104" stroke="#e0e0e8" stroke-width="3.5" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="38" height="32" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="52" cy="60" r="40" stroke="#00e5ff" stroke-width="6" fill="none"/>
+            <line x1="112" y1="16" x2="112" y2="104" stroke="#e0e0e8" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <!-- Favicon -->
+      <div class="logo-size">
+        <svg width="19" height="16" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="52" cy="60" r="40" stroke="#00e5ff" stroke-width="10" fill="none"/>
+            <line x1="112" y1="16" x2="112" y2="104" stroke="#e0e0e8" stroke-width="10" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>16px</span>
+      </div>
+    </div>
+
+    <!-- Lockup -->
+    <div class="lockup-section">
+      <div class="lockup-label">Lockup</div>
+      <div class="logo-row">
+        <svg width="420" height="48" viewBox="0 0 420 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Mark -->
+            <circle cx="18" cy="24" r="16" stroke="#00e5ff" stroke-width="2" fill="none"/>
+            <line x1="42" y1="6" x2="42" y2="42" stroke="#e0e0e8" stroke-width="2" stroke-linecap="round"/>
+            <!-- Wordmark -->
+            <text x="64" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="232" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT D: Terminal Cursor -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept D</div>
+    <div class="concept-title">Terminal Cursor</div>
+    <div class="concept-desc">
+      A blinking cursor — the dot and underscore. The dot is the "operator" (a point of intelligence),
+      the line below is the "one" (a single command line). Minimal to the extreme. Console-native.
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="60" height="120" viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="30" cy="36" r="8" fill="#00e5ff"/>
+            <line x1="10" y1="84" x2="50" y2="84" stroke="#e0e0e8" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-size">
+        <svg width="32" height="64" viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="30" cy="36" r="8" fill="#00e5ff"/>
+            <line x1="10" y1="84" x2="50" y2="84" stroke="#e0e0e8" stroke-width="4" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="16" height="32" viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <circle cx="30" cy="36" r="10" fill="#00e5ff"/>
+            <line x1="8" y1="84" x2="52" y2="84" stroke="#e0e0e8" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <!-- As inline with text -->
+      <div class="logo-size">
+        <svg width="240" height="48" viewBox="0 0 240 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Dot -->
+            <circle cx="10" cy="14" r="4" fill="#00e5ff"/>
+            <!-- Line -->
+            <line x1="2" y1="34" x2="18" y2="34" stroke="#e0e0e8" stroke-width="2" stroke-linecap="round"/>
+            <!-- Wordmark -->
+            <text x="32" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="200" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+        <span>Lockup</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT E: Rounded Square Console -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept E</div>
+    <div class="concept-title">Console Badge</div>
+    <div class="concept-desc">
+      A rounded square frame (like an app icon or hardware badge) with "O1" set inside in monospace.
+      The frame is cyan, the text is white. Feels like a system badge or hardware label.
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <rect x="8" y="8" width="104" height="104" rx="20" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+            <text x="60" y="72" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="600" text-anchor="middle" fill="#e0e0e8" letter-spacing="-2">O</text>
+            <text x="82" y="72" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="600" fill="#00e5ff">1</text>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-size">
+        <svg width="64" height="64" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <rect x="8" y="8" width="104" height="104" rx="20" stroke="#00e5ff" stroke-width="3.5" fill="none"/>
+            <text x="60" y="72" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="600" text-anchor="middle" fill="#e0e0e8" letter-spacing="-2">O</text>
+            <text x="82" y="72" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="600" fill="#00e5ff">1</text>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <rect x="8" y="8" width="104" height="104" rx="20" stroke="#00e5ff" stroke-width="6" fill="none"/>
+            <text x="60" y="74" font-family="'JetBrains Mono', monospace" font-size="54" font-weight="700" text-anchor="middle" fill="#e0e0e8" letter-spacing="-2">O</text>
+            <text x="82" y="74" font-family="'JetBrains Mono', monospace" font-size="54" font-weight="700" fill="#00e5ff">1</text>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+
+      <!-- Favicon -->
+      <div class="logo-size">
+        <svg width="16" height="16" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <rect x="6" y="6" width="108" height="108" rx="22" stroke="#00e5ff" stroke-width="10" fill="none"/>
+            <text x="60" y="78" font-family="'JetBrains Mono', monospace" font-size="58" font-weight="700" text-anchor="middle" fill="#e0e0e8" letter-spacing="-2">O</text>
+            <text x="84" y="78" font-family="'JetBrains Mono', monospace" font-size="58" font-weight="700" fill="#00e5ff">1</text>
+          </g>
+        </svg>
+        <span>16px</span>
+      </div>
+    </div>
+
+    <!-- Lockup -->
+    <div class="lockup-section">
+      <div class="lockup-label">Lockup</div>
+      <div class="logo-row">
+        <svg width="400" height="52" viewBox="0 0 400 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Badge mark -->
+            <rect x="2" y="2" width="48" height="48" rx="10" stroke="#00e5ff" stroke-width="2" fill="none"/>
+            <text x="26" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="600" text-anchor="middle" fill="#e0e0e8" letter-spacing="-1">O</text>
+            <text x="36" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="600" fill="#00e5ff">1</text>
+            <!-- Wordmark -->
+            <text x="68" y="32" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="236" y="32" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CONCEPT F: Interpunct -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="concept">
+    <div class="concept-label">Concept F</div>
+    <div class="concept-title">O Interpunct 1</div>
+    <div class="concept-desc">
+      Pure typographic mark. "O" and "1" separated by a centered dot (interpunct).
+      No container, no frame — just the characters and the relationship between them.
+      The interpunct is the connection point. Clean, ownable, works everywhere.
+    </div>
+
+    <div class="logo-row">
+      <!-- Large -->
+      <div class="logo-size">
+        <svg width="180" height="100" viewBox="0 0 180 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <text x="10" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="300" fill="#00e5ff">O</text>
+            <circle cx="90" cy="54" r="5" fill="#555570"/>
+            <text x="112" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="300" fill="#e0e0e8">1</text>
+          </g>
+        </svg>
+        <span>Full</span>
+      </div>
+
+      <!-- Medium bold -->
+      <div class="logo-size">
+        <svg width="96" height="54" viewBox="0 0 180 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <text x="10" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="300" fill="#00e5ff">O</text>
+            <circle cx="90" cy="54" r="5" fill="#555570"/>
+            <text x="112" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="300" fill="#e0e0e8">1</text>
+          </g>
+        </svg>
+        <span>48px</span>
+      </div>
+
+      <!-- Small -->
+      <div class="logo-size">
+        <svg width="48" height="27" viewBox="0 0 180 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <text x="10" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="400" fill="#00e5ff">O</text>
+            <circle cx="90" cy="54" r="6" fill="#555570"/>
+            <text x="112" y="76" font-family="'JetBrains Mono', monospace" font-size="72" font-weight="400" fill="#e0e0e8">1</text>
+          </g>
+        </svg>
+        <span>32px</span>
+      </div>
+    </div>
+
+    <!-- Lockup -->
+    <div class="lockup-section">
+      <div class="lockup-label">Lockup</div>
+      <div class="logo-row">
+        <svg width="420" height="48" viewBox="0 0 420 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g class="glow-on-hover">
+            <!-- Mark -->
+            <text x="0" y="34" font-family="'JetBrains Mono', monospace" font-size="32" font-weight="300" fill="#00e5ff">O</text>
+            <circle cx="30" cy="24" r="2.5" fill="#555570"/>
+            <text x="38" y="34" font-family="'JetBrains Mono', monospace" font-size="32" font-weight="300" fill="#e0e0e8">1</text>
+            <!-- Separator -->
+            <line x1="72" y1="8" x2="72" y2="40" stroke="#1a1a2e" stroke-width="1"/>
+            <!-- Wordmark -->
+            <text x="88" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+            <text x="256" y="30" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- WORDMARK-ONLY SECTION -->
+<!-- ═══════════════════════════════════════════════ -->
+<div style="max-width: 1200px; margin: 80px auto 0;">
+  <div class="concept">
+    <div class="concept-label">Wordmark Variations</div>
+    <div class="concept-title">Type Treatments</div>
+    <div class="concept-desc">
+      The wordmark without a symbol mark. Three weight/spacing options.
+    </div>
+
+    <div class="wordmark-row">
+      <!-- Light weight, wide spacing -->
+      <div>
+        <div class="lockup-label">Light / Wide</div>
+        <svg width="500" height="40" viewBox="0 0 500 40" fill="none">
+          <text x="0" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="300" letter-spacing="8" fill="#e0e0e8">OPERATOR</text>
+          <text x="290" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="300" letter-spacing="8" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Medium weight, medium spacing -->
+      <div>
+        <div class="lockup-label">Medium / Standard</div>
+        <svg width="400" height="40" viewBox="0 0 400 40" fill="none">
+          <text x="0" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+          <text x="230" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+
+      <hr class="divider">
+
+      <!-- All cyan -->
+      <div>
+        <div class="lockup-label">Monochrome Cyan</div>
+        <svg width="400" height="40" viewBox="0 0 400 40" fill="none">
+          <text x="0" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="400" letter-spacing="4" fill="#00e5ff">OPERATORONE</text>
+        </svg>
+      </div>
+
+      <hr class="divider">
+
+      <!-- Interpunct variation -->
+      <div>
+        <div class="lockup-label">With Interpunct</div>
+        <svg width="420" height="40" viewBox="0 0 420 40" fill="none">
+          <text x="0" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="400" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+          <circle cx="236" cy="22" r="3" fill="#555570"/>
+          <text x="252" y="30" font-family="'JetBrains Mono', monospace" font-size="22" font-weight="400" letter-spacing="4" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 80px; color: #555570; font-size: 11px; text-transform: uppercase; letter-spacing: 3px;">
+  Hover any logo for glow effect
+</div>
+
+</body>
+</html>

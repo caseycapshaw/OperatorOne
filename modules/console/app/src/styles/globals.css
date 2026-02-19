@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/*
+ * Tron: Ares inspired theme — thegridcn aesthetic
+ * Neon cyan on deep blacks, grid patterns, glow effects
+ */
+
+@theme {
+  /* ─── Core palette ─────────────────────────── */
+  --color-grid-black: #0a0a0f;
+  --color-grid-dark: #0d0d14;
+  --color-grid-panel: #12121c;
+  --color-grid-border: #1a1a2e;
+  --color-grid-border-bright: #2a2a4a;
+
+  --color-neon-cyan: #00e5ff;
+  --color-neon-cyan-dim: #00b8d4;
+  --color-neon-blue: #2979ff;
+  --color-neon-orange: #ff6d00;
+  --color-neon-red: #ff1744;
+  --color-neon-green: #00e676;
+  --color-neon-yellow: #ffea00;
+  --color-neon-purple: #d500f9;
+
+  --color-text-primary: #e0e0e8;
+  --color-text-secondary: #8888a0;
+  --color-text-muted: #555570;
+
+  /* ─── Glow shadows ─────────────────────────── */
+  --shadow-glow-cyan: 0 0 10px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.1);
+  --shadow-glow-cyan-sm: 0 0 6px rgba(0, 229, 255, 0.2);
+  --shadow-glow-orange: 0 0 10px rgba(255, 109, 0, 0.3), 0 0 40px rgba(255, 109, 0, 0.1);
+  --shadow-glow-red: 0 0 10px rgba(255, 23, 68, 0.3), 0 0 40px rgba(255, 23, 68, 0.1);
+  --shadow-glow-green: 0 0 10px rgba(0, 230, 118, 0.3), 0 0 40px rgba(0, 230, 118, 0.1);
+
+  /* ─── Animations ───────────────────────────── */
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-scanline: scanline 4s linear infinite;
+  --animate-grid-fade: grid-fade 0.3s ease-out;
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes grid-fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ─── Base styles ──────────────────────────── */
+* {
+  border-color: var(--color-grid-border);
+}
+
+body {
+  background-color: var(--color-grid-black);
+  color: var(--color-text-primary);
+  font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+}
+
+/* ─── Grid background pattern ────────────── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── Scrollbar theming ──────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-grid-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-grid-border-bright);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-cyan-dim);
+}

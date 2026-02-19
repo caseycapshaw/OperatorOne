@@ -1,0 +1,174 @@
+# docker-compose.prod.yml
+# Production overrides with pinned versions
+# Update versions here using: ./scripts/update-component.sh <component> <version>
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  # ─────────────────────────────────────────────────────────
+  # Reverse Proxy / AI Gateway
+  # ─────────────────────────────────────────────────────────
+  traefik:
+    image: traefik:v3.6.1
+    labels:
+      - "traefik.http.routers.traefik-dashboard.middlewares=authentik-auth@file"
+    # Production: Enable access logs
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=op1-frontend"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+      - "--accesslog.format=json"
+      - "--ping=true"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ─────────────────────────────────────────────────────────
+  # Secrets Management
+  # ─────────────────────────────────────────────────────────
+  openbao:
+    image: openbao/openbao:2.5.0
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ─────────────────────────────────────────────────────────
+  # Workflow Automation
+  # ─────────────────────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:1.72.1
+    environment:
+      # Production settings
+      - N8N_LOG_LEVEL=info
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_VERSION_NOTIFICATIONS_ENABLED=false
+    labels:
+      - "traefik.http.routers.n8n.middlewares=authentik-auth@file"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ─────────────────────────────────────────────────────────
+  # Identity / SSO
+  # ─────────────────────────────────────────────────────────
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.12.1
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.12.1
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ─────────────────────────────────────────────────────────
+  # Database
+  # ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16.4-alpine
+    # Production: Add connection limits
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=768MB"
+      - "-c"
+      - "maintenance_work_mem=64MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "log_statement=ddl"
+      - "-c"
+      - "log_min_duration_statement=1000"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ─────────────────────────────────────────────────────────
+  # Cache
+  # ─────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.4.1-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+        reservations:
+          memory: 128M
+
+  # ─────────────────────────────────────────────────────────
+  # Monitoring
+  # ─────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      - GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN=true
+      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  loki:
+    image: grafana/loki:3.3.2
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  promtail:
+    image: grafana/promtail:3.3.2
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M

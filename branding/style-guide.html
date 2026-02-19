@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OperatorOne — Style Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Grid background ─── */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ─── Layout ─── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 80px 48px; }
+
+  section { margin-bottom: 96px; }
+
+  .section-number {
+    font-size: 11px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #00e5ff;
+    margin-bottom: 12px;
+  }
+
+  .section-desc {
+    font-size: 12px;
+    color: #8888a0;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  h3 {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #8888a0;
+    margin-bottom: 20px;
+    margin-top: 48px;
+  }
+
+  h3:first-of-type { margin-top: 0; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1a1a2e;
+    margin: 0 0 96px 0;
+  }
+
+  /* ─── Components ─── */
+  .row {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: start;
+  }
+
+  .card {
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+    padding: 32px;
+  }
+
+  .card:hover { border-color: #2a2a4a; }
+
+  .card-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+    margin-bottom: 16px;
+  }
+
+  .card-value {
+    font-size: 12px;
+    color: #e0e0e8;
+    line-height: 1.6;
+  }
+
+  /* ─── Color swatches ─── */
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .swatch {
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .swatch-color {
+    height: 64px;
+  }
+
+  .swatch-info {
+    padding: 12px 14px;
+    background: #0d0d14;
+  }
+
+  .swatch-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: #e0e0e8;
+    margin-bottom: 4px;
+  }
+
+  .swatch-hex {
+    font-size: 10px;
+    color: #8888a0;
+  }
+
+  .swatch-token {
+    font-size: 9px;
+    color: #555570;
+    margin-top: 4px;
+  }
+
+  /* ─── Typography specimens ─── */
+  .type-specimen {
+    margin-bottom: 24px;
+    padding: 24px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+  }
+
+  .type-meta {
+    font-size: 10px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  /* ─── Logo display ─── */
+  .logo-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+    min-height: 160px;
+  }
+
+  .logo-display.light {
+    background: #e8e8ec;
+    border-color: #ccc;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .logo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-item span {
+    font-size: 9px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ─── Badge hover glow ─── */
+  .badge-glow { transition: filter 0.3s ease; }
+  .badge-glow:hover {
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.3)) drop-shadow(0 0 40px rgba(0, 229, 255, 0.1));
+  }
+
+  /* ─── Copy table ─── */
+  .copy-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .copy-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #1a1a2e;
+    font-size: 12px;
+    vertical-align: top;
+  }
+
+  .copy-table td:first-child {
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 10px;
+    width: 160px;
+    white-space: nowrap;
+  }
+
+  .copy-table td:last-child {
+    color: #e0e0e8;
+  }
+
+  /* ─── Do/Don't ─── */
+  .do-dont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .do-card, .dont-card {
+    padding: 24px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .do-card {
+    border: 1px solid rgba(0, 230, 118, 0.2);
+    background: rgba(0, 230, 118, 0.03);
+  }
+
+  .dont-card {
+    border: 1px solid rgba(255, 23, 68, 0.2);
+    background: rgba(255, 23, 68, 0.03);
+  }
+
+  .do-card .card-label { color: #00e676; }
+  .dont-card .card-label { color: #ff1744; }
+
+  /* ─── Shadow demo ─── */
+  .shadow-demo {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .shadow-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px solid #1a1a2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  /* ─── Spacing scale ─── */
+  .space-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .space-bar {
+    height: 8px;
+    background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 2px;
+  }
+
+  .space-label {
+    font-size: 10px;
+    color: #555570;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  .space-value {
+    font-size: 10px;
+    color: #8888a0;
+    min-width: 40px;
+  }
+
+  /* ─── Header ─── */
+  .hero {
+    text-align: center;
+    padding: 80px 0 60px;
+    border-bottom: 1px solid #1a1a2e;
+    margin-bottom: 80px;
+  }
+
+  .hero svg { margin-bottom: 32px; }
+
+  .hero h1 {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    color: #8888a0;
+    margin-bottom: 8px;
+  }
+
+  .hero p {
+    font-size: 11px;
+    color: #555570;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── Animation demos ─── */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes grid-fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim-pulse { animation: pulse-glow 2s ease-in-out infinite; }
+  .anim-scan { animation: scanline 4s linear infinite; }
+
+  /* ─── UI component demos ─── */
+  .ui-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 1px solid #00e5ff;
+    border-radius: 4px;
+    color: #00e5ff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .ui-button:hover {
+    background: rgba(0, 229, 255, 0.08);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.1);
+  }
+
+  .ui-button-secondary {
+    border-color: #1a1a2e;
+    color: #8888a0;
+  }
+
+  .ui-button-secondary:hover {
+    border-color: #2a2a4a;
+    color: #e0e0e8;
+    box-shadow: none;
+  }
+
+  .ui-input {
+    background: #12121c;
+    border: 1px solid #1a1a2e;
+    border-radius: 4px;
+    padding: 10px 14px;
+    color: #e0e0e8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    width: 260px;
+  }
+
+  .ui-input::placeholder { color: #555570; }
+  .ui-input:focus { border-color: #00e5ff; }
+
+  .ui-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0d0d14; }
+  ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00b8d4; }
+</style>
+</head>
+<body class="grid-bg">
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- HERO -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="hero">
+  <svg width="76" height="76" viewBox="0 0 120 120" fill="none" class="badge-glow">
+    <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+    <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+    <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+  </svg>
+  <h1>OperatorOne Style Guide</h1>
+  <p>Visual identity and design system reference</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 01. LOGO -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">01</div>
+  <h2>Logo</h2>
+  <div class="section-desc">
+    The Console Badge is OperatorOne's primary mark. A rounded square with "O1" set in monospace. The "O" represents the operator, the "1" represents the unified platform.
+  </div>
+
+  <h3>Primary Mark</h3>
+  <div class="row" style="gap: 24px;">
+    <div style="flex: 1;">
+      <div class="logo-display">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+          <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+        </svg>
+      </div>
+      <div class="card-label" style="margin-top: 12px; text-align: center;">On Dark</div>
+    </div>
+    <div style="flex: 1;">
+      <div class="logo-display light">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+          <rect x="10" y="10" width="100" height="100" rx="12" stroke="#0a0a0f" stroke-width="1.5" fill="#0a0a0f"/>
+          <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+        </svg>
+      </div>
+      <div class="card-label" style="margin-top: 12px; text-align: center;">On Light</div>
+    </div>
+  </div>
+
+  <h3>Size Scaling</h3>
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-item">
+        <svg width="128" height="128" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+          <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+        </svg>
+        <span>128px</span>
+      </div>
+      <div class="logo-item">
+        <svg width="64" height="64" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="2.5" fill="#0d0d14"/>
+          <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+          <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+        </svg>
+        <span>64px</span>
+      </div>
+      <div class="logo-item">
+        <svg width="48" height="48" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="3" fill="#0d0d14"/>
+          <text x="35" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+          <text x="68" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+        </svg>
+        <span>48px</span>
+      </div>
+      <div class="logo-item">
+        <svg width="32" height="32" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="8" y="8" width="104" height="104" rx="14" stroke="#00e5ff" stroke-width="4.5" fill="#0d0d14"/>
+          <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#e0e0e8">O</text>
+          <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#00e5ff">1</text>
+        </svg>
+        <span>32px</span>
+      </div>
+      <div class="logo-item">
+        <svg width="24" height="24" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="6" y="6" width="108" height="108" rx="16" stroke="#00e5ff" stroke-width="6" fill="#0d0d14"/>
+          <text x="32" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#e0e0e8">O</text>
+          <text x="66" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#00e5ff">1</text>
+        </svg>
+        <span>24px</span>
+      </div>
+      <div class="logo-item">
+        <svg width="16" height="16" viewBox="0 0 120 120" fill="none" class="badge-glow">
+          <rect x="4" y="4" width="112" height="112" rx="20" stroke="#00e5ff" stroke-width="10" fill="#0d0d14"/>
+          <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+          <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+        </svg>
+        <span>16px</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Lockups</h3>
+  <div class="row" style="gap: 24px;">
+    <div class="card" style="flex: 1;">
+      <div class="card-label">Stacked Beside — Navigation / Inline</div>
+      <div style="padding: 20px 0;">
+        <svg width="260" height="56" viewBox="0 0 260 56" fill="none" class="badge-glow">
+          <rect x="2" y="2" width="52" height="52" rx="7" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+          <text x="14" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="32" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#00e5ff">1</text>
+          <text x="68" y="24" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#e0e0e8">OPERATOR</text>
+          <text x="68" y="44" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card" style="flex: 1;">
+      <div class="card-label">Stacked Centered — Splash / Login</div>
+      <div style="padding: 20px 0; text-align: center;">
+        <svg width="200" height="130" viewBox="0 0 200 130" fill="none" class="badge-glow">
+          <rect x="62" y="4" width="76" height="76" rx="10" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+          <text x="78" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="104" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#00e5ff">1</text>
+          <text x="100" y="106" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="1.5" text-anchor="middle" fill="#e0e0e8">OPERATOR</text>
+          <text x="100" y="124" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="1.5" text-anchor="middle" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <h3>Wordmark</h3>
+  <div class="card">
+    <div class="card-label">Text-only — Metadata / Small UI</div>
+    <div style="padding: 16px 0;">
+      <span style="font-size: 18px; font-weight: 500; letter-spacing: 1px; color: #e0e0e8; text-transform: uppercase;">OPERATOR</span><span style="font-size: 18px; font-weight: 500; letter-spacing: 1px; color: #00e5ff; text-transform: uppercase;">ONE</span>
+    </div>
+  </div>
+
+  <h3>Usage Rules</h3>
+  <div class="do-dont">
+    <div class="do-card">
+      <div class="card-label">Do</div>
+      <div class="card-value">
+        Use on dark backgrounds (#0a0a0f to #12121c)<br>
+        Maintain clear space equal to badge height / 4<br>
+        Use hover glow for interactive contexts<br>
+        Scale border weight and font weight together<br>
+        Use the light-bg variant on white/light surfaces
+      </div>
+    </div>
+    <div class="dont-card">
+      <div class="card-label">Don't</div>
+      <div class="card-value">
+        Apply static glow — glow is hover/active only<br>
+        Place on mid-tone backgrounds (gray zones)<br>
+        Stretch or distort the badge proportions<br>
+        Change the O/1 color relationship<br>
+        Add drop shadows outside the glow system
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 02. COLOR -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">02</div>
+  <h2>Color</h2>
+  <div class="section-desc">
+    All colors are defined as CSS custom properties in globals.css. The palette is organized into surfaces, neon accents, text, and status colors.
+  </div>
+
+  <h3>Surfaces</h3>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #0a0a0f;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Console Black</div>
+        <div class="swatch-hex">#0a0a0f</div>
+        <div class="swatch-token">--color-grid-black</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #0d0d14;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Grid Dark</div>
+        <div class="swatch-hex">#0d0d14</div>
+        <div class="swatch-token">--color-grid-dark</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #12121c;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Grid Panel</div>
+        <div class="swatch-hex">#12121c</div>
+        <div class="swatch-token">--color-grid-panel</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #1a1a2e;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Grid Border</div>
+        <div class="swatch-hex">#1a1a2e</div>
+        <div class="swatch-token">--color-grid-border</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #2a2a4a;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Border Bright</div>
+        <div class="swatch-hex">#2a2a4a</div>
+        <div class="swatch-token">--color-grid-border-bright</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Neon Accents</h3>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #00e5ff;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Neon Cyan (Primary)</div>
+        <div class="swatch-hex">#00e5ff</div>
+        <div class="swatch-token">--color-neon-cyan</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #00b8d4;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Neon Cyan Dim</div>
+        <div class="swatch-hex">#00b8d4</div>
+        <div class="swatch-token">--color-neon-cyan-dim</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #2979ff;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Neon Blue</div>
+        <div class="swatch-hex">#2979ff</div>
+        <div class="swatch-token">--color-neon-blue</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #d500f9;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Neon Purple</div>
+        <div class="swatch-hex">#d500f9</div>
+        <div class="swatch-token">--color-neon-purple</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Status Colors</h3>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #00e676;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Green — Online / Success</div>
+        <div class="swatch-hex">#00e676</div>
+        <div class="swatch-token">--color-neon-green</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #ff6d00;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Orange — Warning</div>
+        <div class="swatch-hex">#ff6d00</div>
+        <div class="swatch-token">--color-neon-orange</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #ff1744;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Red — Error / Critical</div>
+        <div class="swatch-hex">#ff1744</div>
+        <div class="swatch-token">--color-neon-red</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #ffea00;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Yellow — Highlight</div>
+        <div class="swatch-hex">#ffea00</div>
+        <div class="swatch-token">--color-neon-yellow</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Text</h3>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #0a0a0f; display: flex; align-items: center; justify-content: center;"><span style="color: #e0e0e8; font-size: 14px;">Aa</span></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Primary</div>
+        <div class="swatch-hex">#e0e0e8</div>
+        <div class="swatch-token">--color-text-primary</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #0a0a0f; display: flex; align-items: center; justify-content: center;"><span style="color: #8888a0; font-size: 14px;">Aa</span></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Secondary</div>
+        <div class="swatch-hex">#8888a0</div>
+        <div class="swatch-token">--color-text-secondary</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #0a0a0f; display: flex; align-items: center; justify-content: center;"><span style="color: #555570; font-size: 14px;">Aa</span></div>
+      <div class="swatch-info">
+        <div class="swatch-name">Muted</div>
+        <div class="swatch-hex">#555570</div>
+        <div class="swatch-token">--color-text-muted</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Glow Shadows</h3>
+  <div class="shadow-demo">
+    <div class="shadow-item" style="box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), 0 0 40px rgba(0, 229, 255, 0.1);">Cyan</div>
+    <div class="shadow-item" style="box-shadow: 0 0 6px rgba(0, 229, 255, 0.2);">Cyan SM</div>
+    <div class="shadow-item" style="box-shadow: 0 0 10px rgba(0, 230, 118, 0.3), 0 0 40px rgba(0, 230, 118, 0.1);">Green</div>
+    <div class="shadow-item" style="box-shadow: 0 0 10px rgba(255, 109, 0, 0.3), 0 0 40px rgba(255, 109, 0, 0.1);">Orange</div>
+    <div class="shadow-item" style="box-shadow: 0 0 10px rgba(255, 23, 68, 0.3), 0 0 40px rgba(255, 23, 68, 0.1);">Red</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 03. TYPOGRAPHY -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">03</div>
+  <h2>Typography</h2>
+  <div class="section-desc">
+    JetBrains Mono is the sole typeface. All monospace, always. This reinforces the operator's console aesthetic and ensures consistent character alignment.
+  </div>
+
+  <h3>Type Scale</h3>
+
+  <div class="type-specimen">
+    <div class="type-meta">Heading 1 — 18px / 500 / Uppercase / 4px tracking</div>
+    <div style="font-size: 18px; font-weight: 500; text-transform: uppercase; letter-spacing: 4px;">Command View</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-meta">Heading 2 — 14px / 500 / Uppercase / 2px tracking</div>
+    <div style="font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 2px;">Incoming Requests</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-meta">Body — 13px / 400 / Normal case / 0 tracking</div>
+    <div style="font-size: 13px; font-weight: 400; line-height: 1.7;">3 new requests since yesterday. One looks urgent — a client asking about contract renewal. Want me to draft a response?</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-meta">Small / Label — 11px / 500 / Uppercase / 1.5px tracking</div>
+    <div style="font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: #8888a0;">Status Board</div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-meta">Caption / Meta — 10px / 400 / Uppercase / 2px tracking</div>
+    <div style="font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; color: #555570;">Last updated 3 minutes ago</div>
+  </div>
+
+  <h3>Font Stack</h3>
+  <div class="card">
+    <div class="card-value" style="color: #00e5ff;">'JetBrains Mono', 'Fira Code', ui-monospace, monospace</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 04. COMPONENTS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">04</div>
+  <h2>Components</h2>
+  <div class="section-desc">
+    Core UI patterns. All components use borders over shadows, neon highlights over fills, and the glow system for interactive states.
+  </div>
+
+  <h3>Buttons</h3>
+  <div class="card">
+    <div class="row" style="gap: 16px; align-items: center;">
+      <button class="ui-button">Access Console</button>
+      <button class="ui-button ui-button-secondary">Cancel</button>
+    </div>
+    <div style="margin-top: 16px; font-size: 10px; color: #555570;">Primary: cyan border, transparent fill, glow on hover. Secondary: border-only, no glow.</div>
+  </div>
+
+  <h3>Inputs</h3>
+  <div class="card">
+    <div class="row" style="gap: 16px; align-items: center;">
+      <input type="text" class="ui-input" placeholder="operator@company.com">
+      <input type="text" class="ui-input" value="Active input" style="border-color: #00e5ff;">
+    </div>
+    <div style="margin-top: 16px; font-size: 10px; color: #555570;">Panel background, border on focus shifts to neon-cyan. No background color change.</div>
+  </div>
+
+  <h3>Status Badges</h3>
+  <div class="card">
+    <div class="row" style="gap: 12px; align-items: center;">
+      <span class="ui-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; border: 1px solid rgba(0, 230, 118, 0.2);">Online</span>
+      <span class="ui-badge" style="background: rgba(0, 229, 255, 0.1); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.2);">In Progress</span>
+      <span class="ui-badge" style="background: rgba(255, 109, 0, 0.1); color: #ff6d00; border: 1px solid rgba(255, 109, 0, 0.2);">Pending</span>
+      <span class="ui-badge" style="background: rgba(255, 23, 68, 0.1); color: #ff1744; border: 1px solid rgba(255, 23, 68, 0.2);">Error</span>
+      <span class="ui-badge" style="background: rgba(136, 136, 160, 0.1); color: #8888a0; border: 1px solid rgba(136, 136, 160, 0.15);">Archived</span>
+    </div>
+    <div style="margin-top: 16px; font-size: 10px; color: #555570;">10% fill + matching border + neon text. Uppercase, 10px, 1px tracking.</div>
+  </div>
+
+  <h3>Cards / Panels</h3>
+  <div class="card">
+    <div class="row" style="gap: 16px;">
+      <div style="flex: 1; background: #12121c; border: 1px solid #1a1a2e; border-radius: 8px; padding: 20px;">
+        <div style="font-size: 10px; color: #555570; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Grid Panel</div>
+        <div style="font-size: 12px; color: #e0e0e8;">Standard content card. Background: grid-panel. Border: grid-border.</div>
+      </div>
+      <div style="flex: 1; background: #0d0d14; border: 1px solid #1a1a2e; border-radius: 8px; padding: 20px;">
+        <div style="font-size: 10px; color: #555570; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Grid Dark</div>
+        <div style="font-size: 12px; color: #e0e0e8;">Elevated card / sidebar. Background: grid-dark. Border: grid-border.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 05. ANIMATIONS -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">05</div>
+  <h2>Animation</h2>
+  <div class="section-desc">
+    Three motion primitives. Used sparingly to reinforce the "live system" feeling without being distracting.
+  </div>
+
+  <div class="row" style="gap: 24px;">
+    <div class="card" style="flex: 1; text-align: center;">
+      <div class="card-label">Pulse Glow</div>
+      <div style="padding: 24px;">
+        <div class="anim-pulse" style="width: 12px; height: 12px; border-radius: 50%; background: #00e676; margin: 0 auto; box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);"></div>
+      </div>
+      <div style="font-size: 10px; color: #555570;">2s ease-in-out infinite<br>Status indicators, online dots</div>
+    </div>
+    <div class="card" style="flex: 1; text-align: center; overflow: hidden;">
+      <div class="card-label">Scanline</div>
+      <div style="padding: 24px; position: relative; height: 80px;">
+        <div class="anim-scan" style="position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.15), transparent);"></div>
+      </div>
+      <div style="font-size: 10px; color: #555570;">4s linear infinite<br>Background ambient effect</div>
+    </div>
+    <div class="card" style="flex: 1; text-align: center;">
+      <div class="card-label">Grid Fade</div>
+      <div style="padding: 24px;">
+        <div style="font-size: 12px; color: #e0e0e8; animation: grid-fade 2s ease-out infinite;">Content appears</div>
+      </div>
+      <div style="font-size: 10px; color: #555570;">0.3s ease-out<br>Panel/content transitions</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 06. VOICE -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">06</div>
+  <h2>Voice</h2>
+  <div class="section-desc">
+    Calm, competent, direct. The person in the chair who's already handled it. Not shouting, not selling — just stating facts.
+  </div>
+
+  <h3>Principles</h3>
+  <div class="row" style="gap: 16px;">
+    <div class="card" style="flex: 1;">
+      <div class="card-label">Terse</div>
+      <div class="card-value">Say it in fewer words. "Done." not "Your action has been completed successfully!"</div>
+    </div>
+    <div class="card" style="flex: 1;">
+      <div class="card-label">Confident</div>
+      <div class="card-value">"Systems online." not "We believe everything should be working now."</div>
+    </div>
+    <div class="card" style="flex: 1;">
+      <div class="card-label">Capable</div>
+      <div class="card-value">Treat the user as competent. Never condescend.</div>
+    </div>
+    <div class="card" style="flex: 1;">
+      <div class="card-label">No Exclamation</div>
+      <div class="card-value">Never "Oops!", "Yay!", or "Great job!" Period.</div>
+    </div>
+  </div>
+
+  <h3>UI Copy Reference</h3>
+  <div class="card">
+    <table class="copy-table">
+      <tr><td>Login</td><td>Identify yourself.</td></tr>
+      <tr><td>Dashboard</td><td>All systems operational.</td></tr>
+      <tr><td>Empty State</td><td>Nothing in the queue. Rare, but earned.</td></tr>
+      <tr><td>AI Greeting</td><td>Operator One standing by. What do we need?</td></tr>
+      <tr><td>Loading</td><td>Initializing...</td></tr>
+      <tr><td>Error</td><td>Connection interrupted. Retrying.</td></tr>
+      <tr><td>Success</td><td>Done.</td></tr>
+      <tr><td>Onboarding</td><td>Let's get your systems online.</td></tr>
+      <tr><td>Complete</td><td>You're operational.</td></tr>
+      <tr><td>Update</td><td>System update ready: v2.1.0</td></tr>
+      <tr><td>AI Thinking</td><td>Working on it...</td></tr>
+      <tr><td>No Results</td><td>Nothing matches. Adjust your filters.</td></tr>
+      <tr><td>Logout</td><td>Signing off.</td></tr>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 07. SPACING -->
+<!-- ═══════════════════════════════════════════════ -->
+<section>
+  <div class="section-number">07</div>
+  <h2>Spacing</h2>
+  <div class="section-desc">
+    Base-4 spacing scale. Consistent rhythm across all components.
+  </div>
+
+  <div class="card">
+    <div class="space-row">
+      <div class="space-label">4px</div>
+      <div class="space-bar" style="width: 16px;"></div>
+      <div class="space-value">xs</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">8px</div>
+      <div class="space-bar" style="width: 32px;"></div>
+      <div class="space-value">sm</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">12px</div>
+      <div class="space-bar" style="width: 48px;"></div>
+      <div class="space-value">md</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">16px</div>
+      <div class="space-bar" style="width: 64px;"></div>
+      <div class="space-value">lg</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">24px</div>
+      <div class="space-bar" style="width: 96px;"></div>
+      <div class="space-value">xl</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">32px</div>
+      <div class="space-bar" style="width: 128px;"></div>
+      <div class="space-value">2xl</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">48px</div>
+      <div class="space-bar" style="width: 192px;"></div>
+      <div class="space-value">3xl</div>
+    </div>
+    <div class="space-row">
+      <div class="space-label">64px</div>
+      <div class="space-bar" style="width: 256px;"></div>
+      <div class="space-value">4xl</div>
+    </div>
+  </div>
+
+  <h3>Border Radius</h3>
+  <div class="card">
+    <div class="row" style="gap: 24px; align-items: end;">
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border: 1px solid #00e5ff; border-radius: 4px; margin: 0 auto 8px;"></div>
+        <div style="font-size: 9px; color: #555570;">4px — Inputs</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border: 1px solid #00e5ff; border-radius: 6px; margin: 0 auto 8px;"></div>
+        <div style="font-size: 9px; color: #555570;">6px — Buttons</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border: 1px solid #00e5ff; border-radius: 8px; margin: 0 auto 8px;"></div>
+        <div style="font-size: 9px; color: #555570;">8px — Cards</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="width: 48px; height: 48px; border: 1px solid #00e5ff; border-radius: 12px; margin: 0 auto 8px;"></div>
+        <div style="font-size: 9px; color: #555570;">12px — Badge</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════ -->
+<div style="text-align: center; padding: 48px 0; border-top: 1px solid #1a1a2e; margin-top: 48px;">
+  <div style="font-size: 10px; color: #555570; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px;">OperatorOne Style Guide</div>
+  <div style="font-size: 10px; color: #555570;">Source of truth: <span style="color: #8888a0;">modules/portal/app/src/styles/globals.css</span></div>
+</div>
+
+</div>
+</body>
+</html>

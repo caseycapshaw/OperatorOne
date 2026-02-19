@@ -1,0 +1,17 @@
+# modules/admin/docker-compose.dev.yml
+# Dev overrides: HTTP entrypoint, no TLS
+
+services:
+  approval-api:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.approval-api.rule=Host(`api.localhost`) && PathPrefix(`/approvals`)"
+      - "traefik.http.routers.approval-api.entrypoints=web"
+      - "traefik.http.routers.approval-api.tls=false"
+      - "traefik.http.services.approval-api.loadbalancer.server.port=3001"
+
+networks:
+  op1-frontend:
+    external: true
+  op1-backend:
+    external: true

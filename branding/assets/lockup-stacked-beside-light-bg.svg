@@ -1,0 +1,10 @@
+<svg width="260" height="56" viewBox="0 0 260 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- OperatorOne Lockup — Stacked Beside (light background) -->
+  <!-- Badge -->
+  <rect x="2" y="2" width="52" height="52" rx="7" stroke="#0a0a0f" stroke-width="1.5" fill="#0a0a0f"/>
+  <text x="14" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#e0e0e8">O</text>
+  <text x="32" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#00e5ff">1</text>
+  <!-- Text stacked right -->
+  <text x="68" y="24" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#0a0a0f">OPERATOR</text>
+  <text x="68" y="44" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#00b8d4">ONE</text>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "op1-admin": {
+      "command": "node",
+      "args": ["mcp-servers/op1-admin/src/index.js"],
+      "env": {
+        "PROJECT_DIR": "/path/to/operatorone"
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+# modules/admin/docker-compose.yml
+# Self-administration module - enables AI agents to manage system updates
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # Admin MCP Server
+  # Exposes system administration operations as MCP tools
+  # Also runs an HTTP API on port 3000 for approval callbacks
+  # ─────────────────────────────────────────────────────────────
+  admin-mcp-server:
+    build:
+      context: ./mcp-servers/op1-admin
+      dockerfile: Dockerfile
+    container_name: op1-admin-mcp
+    restart: unless-stopped
+    environment:
+      - PROJECT_DIR=/opt/op1
+      - HTTP_PORT=3000
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - APPROVAL_API_TOKEN=${APPROVAL_API_TOKEN}
+      - APPROVAL_CALLBACK_URL=https://automation.${DOMAIN}/webhook/update-approval
+    expose:
+      - "3000"
+    volumes:
+      # Mount project directory for compose file access
+      - ./:/opt/op1:ro
+      # Mount docker socket for container management
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount scripts directory with execute permissions
+      - ./scripts:/opt/op1/scripts:ro
+      # Mount backup directory for read/write
+      - ./backups:/opt/op1/backups
+      # Mount logs directory
+      - admin-logs:/opt/op1/logs
+    networks:
+      - op1-backend
+    labels:
+      - "traefik.enable=false"  # Internal only, accessed via MCP
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─────────────────────────────────────────────────────────────
+  # Approval Handler API
+  # HTTP endpoint for Slack interactive messages
+  # ─────────────────────────────────────────────────────────────
+  approval-api:
+    image: node:20-alpine
+    container_name: op1-approval-api
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install --production && node server.js"
+    environment:
+      - PORT=3001
+      - MCP_SERVER_URL=http://admin-mcp-server:3000
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
+      - APPROVAL_API_TOKEN=${APPROVAL_API_TOKEN}
+    volumes:
+      - ./modules/admin/approval-api:/app
+    networks:
+      - op1-backend
+      - op1-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.approval-api.rule=Host(`api.${DOMAIN}`) && PathPrefix(`/approvals`)"
+      - "traefik.http.routers.approval-api.entrypoints=websecure"
+      - "traefik.http.routers.approval-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.approval-api.loadbalancer.server.port=3001"
+    depends_on:
+      admin-mcp-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  admin-logs:
+
+networks:
+  op1-frontend:
+    external: true
+  op1-backend:
+    external: true

@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0",
+  "description": "MCP Server Configuration for OperatorOne Platform",
+  
+  "servers": {
+    "filesystem": {
+      "enabled": true,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/data/documents"],
+      "permissions": {
+        "read": true,
+        "write": false,
+        "delete": false
+      },
+      "allowedPaths": [
+        "/data/documents",
+        "/data/reports",
+        "/data/templates"
+      ],
+      "blockedPatterns": [
+        "*.env",
+        "*.key",
+        "*.pem",
+        "*credentials*",
+        "*password*",
+        "*secret*"
+      ]
+    },
+    
+    "postgres": {
+      "enabled": true,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${BUSINESS_DB_CONNECTION_STRING}"
+      },
+      "permissions": {
+        "allowedOperations": ["SELECT"],
+        "requireApproval": ["INSERT", "UPDATE", "DELETE"],
+        "blocked": ["DROP", "TRUNCATE", "ALTER", "CREATE", "GRANT"]
+      },
+      "blockedTables": [
+        "users",
+        "credentials",
+        "api_keys",
+        "sessions",
+        "audit_logs",
+        "password_resets"
+      ],
+      "maxRowsReturned": 1000,
+      "queryTimeout": 30000
+    },
+    
+    "slack": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      },
+      "permissions": {
+        "read": true,
+        "post": true,
+        "dm": false
+      },
+      "allowedChannels": [
+        "general",
+        "team-updates",
+        "ai-assistant"
+      ]
+    },
+    
+    "google-drive": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-gdrive"],
+      "env": {
+        "GOOGLE_SERVICE_ACCOUNT_KEY": "${GOOGLE_SERVICE_ACCOUNT_KEY}"
+      },
+      "permissions": {
+        "read": true,
+        "write": false,
+        "delete": false
+      },
+      "allowedFolders": []
+    },
+    
+    "email": {
+      "enabled": false,
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-email"],
+      "permissions": {
+        "read": true,
+        "draft": true,
+        "send": false
+      },
+      "requireApproval": ["send"],
+      "blockedRecipientDomains": []
+    }
+  },
+  
+  "security": {
+    "humanInTheLoop": {
+      "enabled": true,
+      "operations": [
+        "database_write",
+        "email_send",
+        "file_delete",
+        "financial_transaction",
+        "user_modification"
+      ],
+      "approvalTimeout": 300,
+      "notificationChannel": "slack",
+      "fallbackAction": "deny"
+    },
+    
+    "rateLimit": {
+      "enabled": true,
+      "requestsPerMinute": 60,
+      "tokensPerMinute": 100000
+    },
+    
+    "audit": {
+      "enabled": true,
+      "logLevel": "info",
+      "includePayloads": false,
+      "retentionDays": 90
+    },
+    
+    "piiProtection": {
+      "enabled": true,
+      "detectTypes": [
+        "PERSON",
+        "EMAIL_ADDRESS",
+        "PHONE_NUMBER",
+        "CREDIT_CARD",
+        "SSN",
+        "BANK_ACCOUNT"
+      ],
+      "action": "redact",
+      "alertOnDetection": true
+    }
+  },
+  
+  "permissionTiers": {
+    "tier1_readonly": {
+      "description": "Read-only access to documents and data",
+      "allowedTools": [
+        "filesystem.read",
+        "postgres.select",
+        "slack.read",
+        "email.read",
+        "calendar.read"
+      ]
+    },
+    
+    "tier2_write_safe": {
+      "description": "Safe write operations",
+      "inherits": "tier1_readonly",
+      "allowedTools": [
+        "filesystem.write",
+        "calendar.create",
+        "email.draft",
+        "slack.post"
+      ]
+    },
+    
+    "tier3_write_risky": {
+      "description": "Operations requiring approval",
+      "inherits": "tier2_write_safe",
+      "allowedTools": [
+        "postgres.insert",
+        "postgres.update",
+        "email.send"
+      ],
+      "requiresApproval": true
+    },
+    
+    "tier4_admin": {
+      "description": "Administrative operations",
+      "inherits": "tier3_write_risky",
+      "allowedTools": [
+        "postgres.delete",
+        "filesystem.delete"
+      ],
+      "requiresApproval": true,
+      "approverRole": "admin"
+    }
+  },
+  
+  "defaultTier": "tier1_readonly"
+}

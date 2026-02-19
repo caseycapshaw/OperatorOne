@@ -1,0 +1,6 @@
+<svg width="16" height="16" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- OperatorOne Console Badge — 16px favicon -->
+  <rect x="4" y="4" width="112" height="112" rx="20" stroke="#00e5ff" stroke-width="10" fill="#0d0d14"/>
+  <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+  <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+</svg>

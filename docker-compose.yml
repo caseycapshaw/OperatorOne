@@ -1,0 +1,362 @@
+# OperatorOne - Core Stack
+# Version: 1.0
+# 
+# Usage:
+#   1. Copy .env.example to .env and configure
+#   2. Run: docker compose up -d
+#   3. Access services via configured domain
+#
+# Add modules:
+#   docker compose -f docker-compose.yml -f modules/crm/docker-compose.yml up -d
+
+services:
+  # ===========================================
+  # REVERSE PROXY & AI GATEWAY
+  # ===========================================
+  traefik:
+    image: traefik:v3.6
+    container_name: op1-traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=op1-frontend"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--ping=true"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik/dynamic:/etc/traefik/dynamic:ro
+      - traefik-certs:/letsencrypt
+      - traefik-logs:/var/log/traefik
+    networks:
+      - op1-frontend
+      - op1-backend
+    labels:
+      - "traefik.enable=true"
+      # Dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=traefik-auth"
+      # Basic auth for dashboard (generate with: htpasswd -nb admin password)
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # SECRETS MANAGEMENT
+  # ===========================================
+  openbao:
+    image: openbao/openbao:2.5.0
+    container_name: op1-openbao
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    entrypoint: ["/bin/sh", "/openbao/config/entrypoint.sh"]
+    environment:
+      - BAO_PG_CONNECTION_URL=postgresql://openbao:${POSTGRES_OPENBAO_PASSWORD}@postgres:5432/openbao?sslmode=disable
+      - OPENBAO_UNSEAL_KEY=${OPENBAO_UNSEAL_KEY:-}
+    volumes:
+      - ./config/openbao:/openbao/config:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - op1-backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8200/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # WORKFLOW ORCHESTRATION
+  # ===========================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: op1-n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=automation.${DOMAIN}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://automation.${DOMAIN}/
+      - GENERIC_TIMEZONE=${TIMEZONE:-America/Denver}
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_N8N_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_JWT_SECRET}
+      - N8N_METRICS=true
+      # AI Integration
+      - N8N_AI_ENABLED=true
+      # Forward auth SSO (authentik header-based login)
+      - EXTERNAL_HOOK_FILES=/home/node/.n8n/hooks.js
+      - N8N_FORWARD_AUTH_HEADER=X-authentik-email
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - ./config/n8n/hooks.js:/home/node/.n8n/hooks.js:ro
+      - ./config/n8n/workflows:/home/node/workflows:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - op1-backend
+      - op1-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`automation.${DOMAIN}`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=letsencrypt"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+      - "traefik.docker.network=op1-frontend"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===========================================
+  # IDENTITY & SSO
+  # ===========================================
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.12
+    container_name: op1-authentik-server
+    restart: unless-stopped
+    command: server
+    environment:
+      - AUTHENTIK_REDIS__HOST=redis
+      - AUTHENTIK_POSTGRESQL__HOST=postgres
+      - AUTHENTIK_POSTGRESQL__USER=authentik
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_AUTHENTIK_PASSWORD}
+      - AUTHENTIK_SECRET_KEY=${AUTHENTIK_SECRET_KEY}
+      - AUTHENTIK_ERROR_REPORTING__ENABLED=false
+      - AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD:-}
+      - AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN:-}
+      # Email (optional)
+      - AUTHENTIK_EMAIL__HOST=${SMTP_HOST:-}
+      - AUTHENTIK_EMAIL__PORT=${SMTP_PORT:-587}
+      - AUTHENTIK_EMAIL__USERNAME=${SMTP_USERNAME:-}
+      - AUTHENTIK_EMAIL__PASSWORD=${SMTP_PASSWORD:-}
+      - AUTHENTIK_EMAIL__FROM=${SMTP_FROM:-noreply@${DOMAIN}}
+    volumes:
+      - authentik-media:/media
+      - authentik-templates:/templates
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - op1-backend
+      - op1-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authentik.rule=Host(`auth.${DOMAIN}`) || HostRegexp(`{subdomain:[a-z]+}.${DOMAIN}`) && PathPrefix(`/outpost.goauthentik.io/`)"
+      - "traefik.http.routers.authentik.entrypoints=websecure"
+      - "traefik.http.routers.authentik.tls.certresolver=letsencrypt"
+      - "traefik.http.services.authentik.loadbalancer.server.port=9000"
+      - "traefik.docker.network=op1-frontend"
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.12
+    container_name: op1-authentik-worker
+    restart: unless-stopped
+    command: worker
+    environment:
+      - AUTHENTIK_REDIS__HOST=redis
+      - AUTHENTIK_POSTGRESQL__HOST=postgres
+      - AUTHENTIK_POSTGRESQL__USER=authentik
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__PASSWORD=${POSTGRES_AUTHENTIK_PASSWORD}
+      - AUTHENTIK_SECRET_KEY=${AUTHENTIK_SECRET_KEY}
+    volumes:
+      - authentik-media:/media
+      - authentik-templates:/templates
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - op1-backend
+
+  # ===========================================
+  # DATA STORES
+  # ===========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: op1-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_ROOT_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=openbao,n8n,authentik,portal
+      - POSTGRES_OPENBAO_PASSWORD=${POSTGRES_OPENBAO_PASSWORD}
+      - POSTGRES_N8N_PASSWORD=${POSTGRES_N8N_PASSWORD}
+      - POSTGRES_AUTHENTIK_PASSWORD=${POSTGRES_AUTHENTIK_PASSWORD}
+      - POSTGRES_PORTAL_PASSWORD=${POSTGRES_PORTAL_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
+    networks:
+      - op1-backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: op1-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - op1-backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # OBSERVABILITY (Optional but recommended)
+  # ===========================================
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: op1-loki
+    restart: unless-stopped
+    volumes:
+      - loki-data:/loki
+      - ./config/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - op1-backend
+    profiles:
+      - observability
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1:3100/ready || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: op1-promtail
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - traefik-logs:/var/log/traefik:ro
+      - ./config/promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - op1-backend
+    profiles:
+      - observability
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9080' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: op1-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SERVER_ROOT_URL=https://monitor.${DOMAIN}
+      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
+      - GF_AUTH_GENERIC_OAUTH_NAME=Authentik
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_OAUTH_CLIENT_ID:-}
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${GRAFANA_OAUTH_CLIENT_SECRET:-}
+      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email groups
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://auth.${DOMAIN}/application/o/authorize/
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://auth.${DOMAIN}/application/o/token/
+      - GF_AUTH_GENERIC_OAUTH_API_URL=https://auth.${DOMAIN}/application/o/userinfo/
+      - GF_AUTH_GENERIC_OAUTH_AUTO_LOGIN=false
+      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
+      - GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH=contains(groups[*], 'admins') && 'Admin' || contains(groups[*], 'editors') && 'Editor' || 'Viewer'
+      - GF_AUTH_GENERIC_OAUTH_REDIRECT_URL=${GRAFANA_OAUTH_REDIRECT_URL:-https://monitor.${DOMAIN}/login/generic_oauth}
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/system-overview.json
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - loki
+    networks:
+      - op1-backend
+      - op1-frontend
+    profiles:
+      - observability
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`monitor.${DOMAIN}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.docker.network=op1-frontend"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+# ===========================================
+# NETWORKS
+# ===========================================
+networks:
+  op1-frontend:
+    name: op1-frontend
+    driver: bridge
+  op1-backend:
+    name: op1-backend
+    driver: bridge
+    internal: true
+
+# ===========================================
+# VOLUMES
+# ===========================================
+volumes:
+  traefik-certs:
+  traefik-logs:
+  postgres-data:
+  redis-data:
+  n8n-data:
+  authentik-media:
+  authentik-templates:
+  loki-data:
+  grafana-data:

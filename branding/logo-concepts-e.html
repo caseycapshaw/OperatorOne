@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OperatorOne — Concept E Refinement</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #8888a0;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: #555570;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  .section {
+    max-width: 1200px;
+    margin: 0 auto 80px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #00e5ff;
+    margin-bottom: 12px;
+  }
+
+  .section-desc {
+    font-size: 12px;
+    color: #8888a0;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  .row {
+    display: flex;
+    align-items: start;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .variant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+    min-width: 180px;
+  }
+
+  .variant:hover {
+    border-color: #2a2a4a;
+  }
+
+  .variant-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+  }
+
+  .variant-name {
+    font-size: 11px;
+    color: #8888a0;
+    text-align: center;
+  }
+
+  .lockup-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .lockup-card {
+    padding: 32px 40px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+  }
+
+  .lockup-card:hover {
+    border-color: #2a2a4a;
+  }
+
+  .lockup-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1a1a2e;
+    margin: 0 auto;
+    max-width: 1200px;
+    margin-bottom: 80px;
+  }
+
+  .context-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 20px;
+    border-radius: 6px;
+  }
+
+  .size-strip {
+    display: flex;
+    align-items: end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .size-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .size-item span {
+    font-size: 9px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Glow animation */
+  @keyframes subtle-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.2)); }
+    50% { filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.4)); }
+  }
+
+  .glow-animate {
+    animation: subtle-glow 3s ease-in-out infinite;
+  }
+
+  /* Context mockups */
+  .mock-sidebar {
+    background: #0d0d14;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 20px 16px;
+    width: 240px;
+  }
+
+  .mock-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #8888a0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .mock-sidebar-item.active {
+    color: #00e5ff;
+    background: rgba(0, 229, 255, 0.05);
+  }
+
+  .mock-browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #1a1a2e;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 16px;
+  }
+
+  .mock-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0d0d14;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: #8888a0;
+  }
+
+  .mock-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .mock-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2a2a4a;
+  }
+</style>
+</head>
+<body>
+
+<h1>Concept E — Console Badge</h1>
+<div class="subtitle">Refinement explorations</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 1: Border Weight Variations -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">1. Border Weight</div>
+  <div class="section-desc">Same form, different stroke weights. Heavier borders hold up better at small sizes.</div>
+
+  <div class="row">
+    <!-- Hairline -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="1.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Hairline</div>
+      <div class="variant-name">1.5px stroke</div>
+    </div>
+
+    <!-- Light -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Light</div>
+      <div class="variant-name">2.5px stroke</div>
+    </div>
+
+    <!-- Medium -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="4" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Medium</div>
+      <div class="variant-name">4px stroke</div>
+    </div>
+
+    <!-- Bold -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="6" fill="none"/>
+        <text x="35" y="76" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="700" fill="#e0e0e8">O</text>
+        <text x="68" y="76" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="700" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Bold</div>
+      <div class="variant-name">6px stroke</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 2: Corner Radius -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">2. Corner Radius</div>
+  <div class="section-desc">From sharp to soft. Sharper feels more technical; rounder feels more app-like.</div>
+
+  <div class="row">
+    <!-- Sharp -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="4" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Sharp</div>
+      <div class="variant-name">4px radius</div>
+    </div>
+
+    <!-- Moderate -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Moderate</div>
+      <div class="variant-name">12px radius</div>
+    </div>
+
+    <!-- Soft -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="22" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Soft</div>
+      <div class="variant-name">22px radius</div>
+    </div>
+
+    <!-- Squircle -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="32" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Squircle</div>
+      <div class="variant-name">32px radius</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 3: Fill Treatments -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">3. Fill Treatments</div>
+  <div class="section-desc">Outline vs filled variations. Filled versions work for app icons and dark backgrounds.</div>
+
+  <div class="row">
+    <!-- Outline (default) -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Outline</div>
+      <div class="variant-name">Default / transparent</div>
+    </div>
+
+    <!-- Subtle fill -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="#0d0d14"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Panel Fill</div>
+      <div class="variant-name">grid-dark background</div>
+    </div>
+
+    <!-- Solid dark fill -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="#0a0a0f"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Solid Dark</div>
+      <div class="variant-name">console-black fill</div>
+    </div>
+
+    <!-- Cyan fill, dark text -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" fill="#00e5ff"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="700" fill="#0a0a0f">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="700" fill="#0a0a0f">1</text>
+      </svg>
+      <div class="variant-label">Inverted</div>
+      <div class="variant-name">Cyan fill / dark text</div>
+    </div>
+
+    <!-- Cyan border + subtle cyan tint fill -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="rgba(0, 229, 255, 0.05)"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Tinted</div>
+      <div class="variant-name">5% cyan fill</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 4: Text Treatment Inside Badge -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">4. Interior Text Treatment</div>
+  <div class="section-desc">How the O1 sits inside the badge. Weight, color split, and spacing variations.</div>
+
+  <div class="row">
+    <!-- Both cyan -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">All Cyan</div>
+      <div class="variant-name">Monochrome</div>
+    </div>
+
+    <!-- O white, 1 cyan (default) -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Split</div>
+      <div class="variant-name">O=white, 1=cyan</div>
+    </div>
+
+    <!-- O cyan, 1 white -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">1</text>
+      </svg>
+      <div class="variant-label">Reverse Split</div>
+      <div class="variant-name">O=cyan, 1=white</div>
+    </div>
+
+    <!-- All white -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">1</text>
+      </svg>
+      <div class="variant-label">All White</div>
+      <div class="variant-name">Border carries the cyan</div>
+    </div>
+
+    <!-- Light weight -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="300" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="300" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Light Weight</div>
+      <div class="variant-name">300 weight</div>
+    </div>
+
+    <!-- Extra bold -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="33" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="800" fill="#e0e0e8">O</text>
+        <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="800" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Extra Bold</div>
+      <div class="variant-name">800 weight</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 5: Glow States -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">5. Glow States</div>
+  <div class="section-desc">The badge with the brand's glow-cyan shadow applied. Static and animated.</div>
+
+  <div class="row">
+    <!-- No glow -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">No Glow</div>
+      <div class="variant-name">Default state</div>
+    </div>
+
+    <!-- Static glow -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none" style="filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.3)) drop-shadow(0 0 40px rgba(0, 229, 255, 0.1));">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Static Glow</div>
+      <div class="variant-name">shadow-glow-cyan</div>
+    </div>
+
+    <!-- Animated glow -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none" class="glow-animate">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Pulse Glow</div>
+      <div class="variant-name">Animated, for loading/status</div>
+    </div>
+
+    <!-- Strong glow -->
+    <div class="variant">
+      <svg width="100" height="100" viewBox="0 0 120 120" fill="none" style="filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.3)) drop-shadow(0 0 60px rgba(0, 229, 255, 0.15));">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="3" fill="rgba(0, 229, 255, 0.05)"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Hero Glow</div>
+      <div class="variant-name">Marketing / splash</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 6: Full Lockups -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">6. Lockups</div>
+  <div class="section-desc">Badge + wordmark combinations for different contexts.</div>
+
+  <div class="lockup-row">
+    <!-- Horizontal standard -->
+    <div class="lockup-card">
+      <div class="lockup-label">Horizontal — Standard</div>
+      <svg width="400" height="52" viewBox="0 0 400 52" fill="none">
+        <rect x="2" y="2" width="48" height="48" rx="9" stroke="#00e5ff" stroke-width="2" fill="none"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <text x="68" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+        <text x="236" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- Horizontal with separator -->
+    <div class="lockup-card">
+      <div class="lockup-label">Horizontal — With Divider</div>
+      <svg width="420" height="52" viewBox="0 0 420 52" fill="none">
+        <rect x="2" y="2" width="48" height="48" rx="9" stroke="#00e5ff" stroke-width="2" fill="none"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <!-- Divider line -->
+        <line x1="64" y1="10" x2="64" y2="42" stroke="#1a1a2e" stroke-width="1"/>
+        <text x="80" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#e0e0e8">OPERATOR</text>
+        <text x="248" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="4" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- Horizontal compact -->
+    <div class="lockup-card">
+      <div class="lockup-label">Horizontal — Compact</div>
+      <svg width="320" height="36" viewBox="0 0 320 36" fill="none">
+        <rect x="2" y="2" width="32" height="32" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="none"/>
+        <text x="10" y="24" font-family="'JetBrains Mono', monospace" font-size="17" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="22" y="24" font-family="'JetBrains Mono', monospace" font-size="17" font-weight="500" fill="#00e5ff">1</text>
+        <text x="46" y="23" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="3" fill="#e0e0e8">OPERATOR</text>
+        <text x="172" y="23" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="3" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- Stacked -->
+    <div class="lockup-card">
+      <div class="lockup-label">Stacked — Centered</div>
+      <div style="display: flex; justify-content: center;">
+        <svg width="200" height="140" viewBox="0 0 200 140" fill="none">
+          <!-- Badge centered -->
+          <rect x="62" y="4" width="76" height="76" rx="14" stroke="#00e5ff" stroke-width="2.5" fill="none"/>
+          <text x="78" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="104" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#00e5ff">1</text>
+          <!-- Text below -->
+          <text x="100" y="112" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="3" text-anchor="middle" fill="#e0e0e8">OPERATOR</text>
+          <text x="100" y="132" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="3" text-anchor="middle" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 7: Size Scaling -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">7. Size Scaling</div>
+  <div class="section-desc">How the badge holds up across real-world sizes. Stroke and weight increase at smaller sizes for legibility.</div>
+
+  <div class="size-strip">
+    <div class="size-item">
+      <svg width="128" height="128" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="2" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <span>128px — App icon</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="64" height="64" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="3" fill="none"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <span>64px — Sidebar</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="48" height="48" viewBox="0 0 120 120" fill="none">
+        <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="4" fill="none"/>
+        <text x="35" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <span>48px — Nav</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="32" height="32" viewBox="0 0 120 120" fill="none">
+        <rect x="8" y="8" width="104" height="104" rx="20" stroke="#00e5ff" stroke-width="6" fill="none"/>
+        <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#e0e0e8">O</text>
+        <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#00e5ff">1</text>
+      </svg>
+      <span>32px — Tab</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="24" height="24" viewBox="0 0 120 120" fill="none">
+        <rect x="6" y="6" width="108" height="108" rx="22" stroke="#00e5ff" stroke-width="8" fill="none"/>
+        <text x="32" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#e0e0e8">O</text>
+        <text x="66" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#00e5ff">1</text>
+      </svg>
+      <span>24px — Small</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="16" height="16" viewBox="0 0 120 120" fill="none">
+        <rect x="4" y="4" width="112" height="112" rx="24" stroke="#00e5ff" stroke-width="12" fill="#0a0a0f"/>
+        <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+        <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+      </svg>
+      <span>16px — Favicon</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SECTION 8: In Context -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">8. In Context</div>
+  <div class="section-desc">How the logo works in real product locations.</div>
+
+  <div class="row" style="gap: 48px;">
+    <!-- Browser tab mockup -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Browser Tab</div>
+      <div class="mock-browser-bar" style="width: 400px;">
+        <div class="mock-dots"><span></span><span></span><span></span></div>
+        <div class="mock-tab">
+          <svg width="14" height="14" viewBox="0 0 120 120" fill="none">
+            <rect x="4" y="4" width="112" height="112" rx="24" stroke="#00e5ff" stroke-width="12" fill="#0a0a0f"/>
+            <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+            <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+          </svg>
+          OperatorOne
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar mockup -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Sidebar Navigation</div>
+      <div class="mock-sidebar">
+        <!-- Logo area -->
+        <div style="display: flex; align-items: center; gap: 12px; padding: 4px 12px 20px; border-bottom: 1px solid #1a1a2e; margin-bottom: 16px;">
+          <svg width="28" height="28" viewBox="0 0 120 120" fill="none">
+            <rect x="8" y="8" width="104" height="104" rx="20" stroke="#00e5ff" stroke-width="5" fill="none"/>
+            <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="600" fill="#e0e0e8">O</text>
+            <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="600" fill="#00e5ff">1</text>
+          </svg>
+          <span style="font-size: 13px; color: #00e5ff; text-transform: uppercase; letter-spacing: 3px; font-weight: 500;">Operator</span>
+        </div>
+        <div class="mock-sidebar-item active">Overview</div>
+        <div class="mock-sidebar-item">Incoming</div>
+        <div class="mock-sidebar-item">Vault</div>
+        <div class="mock-sidebar-item">Config</div>
+      </div>
+    </div>
+
+    <!-- Login page mockup -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Login Page</div>
+      <div style="width: 280px; border: 1px solid #1a1a2e; border-radius: 8px; background: #0d0d14; padding: 40px 32px; text-align: center;">
+        <div style="margin-bottom: 24px;">
+          <svg width="64" height="64" viewBox="0 0 120 120" fill="none" class="glow-animate">
+            <rect x="10" y="10" width="100" height="100" rx="18" stroke="#00e5ff" stroke-width="3" fill="none"/>
+            <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+            <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+          </svg>
+        </div>
+        <div style="font-size: 14px; color: #8888a0; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px;">Identify yourself</div>
+        <div style="background: #12121c; border: 1px solid #1a1a2e; border-radius: 4px; padding: 10px 14px; text-align: left; font-size: 12px; color: #555570; margin-bottom: 12px;">operator@company.com</div>
+        <div style="background: #12121c; border: 1px solid #1a1a2e; border-radius: 4px; padding: 10px 14px; text-align: left; font-size: 12px; color: #555570; margin-bottom: 24px;">password</div>
+        <div style="background: transparent; border: 1px solid #00e5ff; border-radius: 4px; padding: 10px; color: #00e5ff; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer;">Access Console</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 80px; padding-bottom: 40px; color: #555570; font-size: 11px; text-transform: uppercase; letter-spacing: 3px;">
+  End of Concept E explorations
+</div>
+
+</body>
+</html>

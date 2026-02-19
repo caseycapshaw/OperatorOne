@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OperatorOne — Final Mark</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #8888a0;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: #555570;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  .section {
+    max-width: 1200px;
+    margin: 0 auto 80px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #00e5ff;
+    margin-bottom: 12px;
+  }
+
+  .section-desc {
+    font-size: 12px;
+    color: #8888a0;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  .row {
+    display: flex;
+    align-items: start;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .variant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+    min-width: 180px;
+  }
+
+  .variant:hover {
+    border-color: #2a2a4a;
+  }
+
+  .variant-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+  }
+
+  .variant-name {
+    font-size: 11px;
+    color: #8888a0;
+    text-align: center;
+  }
+
+  .lockup-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .lockup-card {
+    padding: 32px 40px;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    background: #0d0d14;
+  }
+
+  .lockup-card:hover {
+    border-color: #2a2a4a;
+  }
+
+  .lockup-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #555570;
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid #1a1a2e;
+    margin: 0 auto;
+    max-width: 1200px;
+    margin-bottom: 80px;
+  }
+
+  /* Hover glow on badge marks */
+  .badge-mark {
+    transition: filter 0.3s ease;
+  }
+  .badge-mark:hover {
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.3)) drop-shadow(0 0 40px rgba(0, 229, 255, 0.1));
+  }
+
+  /* Hover glow on lockups */
+  .lockup-hover {
+    transition: filter 0.3s ease;
+  }
+  .lockup-hover:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.25)) drop-shadow(0 0 30px rgba(0, 229, 255, 0.08));
+  }
+
+  .size-strip {
+    display: flex;
+    align-items: end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .size-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .size-item span {
+    font-size: 9px;
+    color: #555570;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .mock-browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #1a1a2e;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 16px;
+  }
+
+  .mock-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0d0d14;
+    border-radius: 6px 6px 0 0;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: #8888a0;
+  }
+
+  .mock-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .mock-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2a2a4a;
+  }
+
+  .mock-sidebar {
+    background: #0d0d14;
+    border: 1px solid #1a1a2e;
+    border-radius: 8px;
+    padding: 20px 16px;
+    width: 240px;
+  }
+
+  .mock-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #8888a0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .mock-sidebar-item.active {
+    color: #00e5ff;
+    background: rgba(0, 229, 255, 0.05);
+  }
+
+  @keyframes subtle-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.2)); }
+    50% { filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.4)); }
+  }
+  .glow-animate {
+    animation: subtle-glow 3s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<h1>OperatorOne — Locked Specs</h1>
+<div class="subtitle">Hairline border / Moderate radius / Panel fill / Split color / Hover glow</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- THE MARK -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">The Mark</div>
+  <div class="section-desc">Locked parameters. Hover for glow.</div>
+
+  <div class="row">
+    <div class="variant">
+      <svg width="128" height="128" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Primary Mark</div>
+    </div>
+
+    <div class="variant">
+      <svg width="128" height="128" viewBox="0 0 120 120" fill="none" class="badge-mark" style="filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.3)) drop-shadow(0 0 40px rgba(0, 229, 255, 0.1));">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label">Hover / Active State</div>
+    </div>
+
+    <!-- Inverted for light backgrounds -->
+    <div class="variant" style="background: #e0e0e8; border-color: #ccc;">
+      <svg width="128" height="128" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#0a0a0f" stroke-width="1.5" fill="#0a0a0f"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <div class="variant-label" style="color: #888;">On Light Background</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LOCKUP SPACING EXPLORATIONS -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">Lockup Spacing</div>
+  <div class="section-desc">Tighter word spacing options. Finding the right density.</div>
+
+  <div class="lockup-row">
+
+    <!-- A: Tight, no letter-spacing -->
+    <div class="lockup-card">
+      <div class="lockup-label">A — Tight / No tracking</div>
+      <svg width="340" height="52" viewBox="0 0 340 52" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="48" height="48" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <text x="64" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="0" fill="#e0e0e8">OPERATOR</text>
+        <text x="210" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="0" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- B: Slight tracking -->
+    <div class="lockup-card">
+      <div class="lockup-label">B — Slight tracking (1px)</div>
+      <svg width="360" height="52" viewBox="0 0 360 52" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="48" height="48" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <text x="64" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#e0e0e8">OPERATOR</text>
+        <text x="218" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- C: Moderate tracking -->
+    <div class="lockup-card">
+      <div class="lockup-label">C — Moderate tracking (2px)</div>
+      <svg width="380" height="52" viewBox="0 0 380 52" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="48" height="48" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <text x="64" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="2" fill="#e0e0e8">OPERATOR</text>
+        <text x="230" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="2" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- D: One word, no space -->
+    <div class="lockup-card">
+      <div class="lockup-label">D — Single word / No space between</div>
+      <svg width="360" height="52" viewBox="0 0 360 52" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="48" height="48" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <text x="64" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#e0e0e8">OPERATOR</text><text x="207" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- E: With divider, tight -->
+    <div class="lockup-card">
+      <div class="lockup-label">E — Divider / Tight</div>
+      <svg width="370" height="52" viewBox="0 0 370 52" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="48" height="48" rx="6" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="30" y="34" font-family="'JetBrains Mono', monospace" font-size="24" font-weight="500" fill="#00e5ff">1</text>
+        <line x1="60" y1="12" x2="60" y2="40" stroke="#1a1a2e" stroke-width="1"/>
+        <text x="72" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#e0e0e8">OPERATOR</text><text x="215" y="33" font-family="'JetBrains Mono', monospace" font-size="18" font-weight="500" letter-spacing="1" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- F: Compact, smaller text -->
+    <div class="lockup-card">
+      <div class="lockup-label">F — Compact / Smaller type</div>
+      <svg width="300" height="42" viewBox="0 0 300 42" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="38" height="38" rx="5" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="12" y="28" font-family="'JetBrains Mono', monospace" font-size="20" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="25" y="28" font-family="'JetBrains Mono', monospace" font-size="20" font-weight="500" fill="#00e5ff">1</text>
+        <text x="52" y="26" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#e0e0e8">OPERATOR</text><text x="172" y="26" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- G: Two-line stacked next to badge -->
+    <div class="lockup-card">
+      <div class="lockup-label">G — Stacked beside badge</div>
+      <svg width="260" height="56" viewBox="0 0 260 56" fill="none" class="lockup-hover">
+        <rect x="2" y="2" width="52" height="52" rx="7" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="14" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="32" y="36" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="500" fill="#00e5ff">1</text>
+        <text x="68" y="24" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#e0e0e8">OPERATOR</text>
+        <text x="68" y="44" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" letter-spacing="1.5" fill="#00e5ff">ONE</text>
+      </svg>
+    </div>
+
+    <!-- H: Two-line stacked, centered -->
+    <div class="lockup-card">
+      <div class="lockup-label">H — Stacked centered</div>
+      <div style="display: flex; justify-content: center;">
+        <svg width="200" height="120" viewBox="0 0 200 120" fill="none" class="lockup-hover">
+          <rect x="62" y="4" width="76" height="76" rx="10" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+          <text x="78" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#e0e0e8">O</text>
+          <text x="104" y="54" font-family="'JetBrains Mono', monospace" font-size="38" font-weight="500" fill="#00e5ff">1</text>
+          <text x="100" y="102" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="1.5" text-anchor="middle" fill="#e0e0e8">OPERATOR</text>
+          <text x="100" y="118" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="500" letter-spacing="1.5" text-anchor="middle" fill="#00e5ff">ONE</text>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SIZE SCALING WITH LOCKED SPECS -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">Size Scaling</div>
+  <div class="section-desc">Locked specs across sizes. Hover any for glow.</div>
+
+  <div class="size-strip">
+    <div class="size-item">
+      <svg width="128" height="128" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+      </svg>
+      <span>128px</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="64" height="64" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="2.5" fill="#0d0d14"/>
+        <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <span>64px</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="48" height="48" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="3" fill="#0d0d14"/>
+        <text x="35" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#e0e0e8">O</text>
+        <text x="68" y="75" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="600" fill="#00e5ff">1</text>
+      </svg>
+      <span>48px</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="32" height="32" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="8" y="8" width="104" height="104" rx="14" stroke="#00e5ff" stroke-width="4.5" fill="#0d0d14"/>
+        <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#e0e0e8">O</text>
+        <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#00e5ff">1</text>
+      </svg>
+      <span>32px</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="24" height="24" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="6" y="6" width="108" height="108" rx="16" stroke="#00e5ff" stroke-width="6" fill="#0d0d14"/>
+        <text x="32" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#e0e0e8">O</text>
+        <text x="66" y="78" font-family="'JetBrains Mono', monospace" font-size="52" font-weight="700" fill="#00e5ff">1</text>
+      </svg>
+      <span>24px</span>
+    </div>
+
+    <div class="size-item">
+      <svg width="16" height="16" viewBox="0 0 120 120" fill="none" class="badge-mark">
+        <rect x="4" y="4" width="112" height="112" rx="20" stroke="#00e5ff" stroke-width="10" fill="#0d0d14"/>
+        <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+        <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+      </svg>
+      <span>16px</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IN CONTEXT -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title">In Context</div>
+  <div class="section-desc">The locked mark in real product locations.</div>
+
+  <div class="row" style="gap: 48px;">
+    <!-- Browser tab -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Browser Tab</div>
+      <div class="mock-browser-bar" style="width: 420px;">
+        <div class="mock-dots"><span></span><span></span><span></span></div>
+        <div class="mock-tab">
+          <svg width="14" height="14" viewBox="0 0 120 120" fill="none">
+            <rect x="4" y="4" width="112" height="112" rx="20" stroke="#00e5ff" stroke-width="10" fill="#0d0d14"/>
+            <text x="30" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#e0e0e8">O</text>
+            <text x="66" y="82" font-family="'JetBrains Mono', monospace" font-size="56" font-weight="800" fill="#00e5ff">1</text>
+          </svg>
+          OperatorOne
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Sidebar</div>
+      <div class="mock-sidebar">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 4px 12px 20px; border-bottom: 1px solid #1a1a2e; margin-bottom: 16px;">
+          <svg width="28" height="28" viewBox="0 0 120 120" fill="none" class="badge-mark">
+            <rect x="8" y="8" width="104" height="104" rx="14" stroke="#00e5ff" stroke-width="4.5" fill="#0d0d14"/>
+            <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#e0e0e8">O</text>
+            <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#00e5ff">1</text>
+          </svg>
+          <div>
+            <span style="font-size: 12px; color: #e0e0e8; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;">OPERATOR</span><span style="font-size: 12px; color: #00e5ff; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;">ONE</span>
+          </div>
+        </div>
+        <div class="mock-sidebar-item active">Overview</div>
+        <div class="mock-sidebar-item">Incoming</div>
+        <div class="mock-sidebar-item">Vault</div>
+        <div class="mock-sidebar-item">Config</div>
+      </div>
+    </div>
+
+    <!-- Login page -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">Login</div>
+      <div style="width: 280px; border: 1px solid #1a1a2e; border-radius: 8px; background: #0d0d14; padding: 40px 32px; text-align: center;">
+        <div style="margin-bottom: 24px;">
+          <svg width="64" height="64" viewBox="0 0 120 120" fill="none" class="glow-animate">
+            <rect x="10" y="10" width="100" height="100" rx="12" stroke="#00e5ff" stroke-width="1.5" fill="#0d0d14"/>
+            <text x="35" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#e0e0e8">O</text>
+            <text x="68" y="74" font-family="'JetBrains Mono', monospace" font-size="48" font-weight="500" fill="#00e5ff">1</text>
+          </svg>
+        </div>
+        <div style="font-size: 14px; color: #8888a0; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px;">Identify yourself</div>
+        <div style="background: #12121c; border: 1px solid #1a1a2e; border-radius: 4px; padding: 10px 14px; text-align: left; font-size: 12px; color: #555570; margin-bottom: 12px;">operator@company.com</div>
+        <div style="background: #12121c; border: 1px solid #1a1a2e; border-radius: 4px; padding: 10px 14px; text-align: left; font-size: 12px; color: #555570; margin-bottom: 24px;">password</div>
+        <div style="background: transparent; border: 1px solid #00e5ff; border-radius: 4px; padding: 10px; color: #00e5ff; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; cursor: pointer;">Access Console</div>
+      </div>
+    </div>
+
+    <!-- Chat / AI context -->
+    <div>
+      <div class="lockup-label" style="margin-bottom: 12px;">AI Agent Chat</div>
+      <div style="width: 320px; border: 1px solid #1a1a2e; border-radius: 8px; background: #0d0d14; padding: 24px;">
+        <!-- Agent message -->
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+          <svg width="28" height="28" viewBox="0 0 120 120" fill="none" style="flex-shrink: 0; margin-top: 2px;">
+            <rect x="8" y="8" width="104" height="104" rx="14" stroke="#00e5ff" stroke-width="4.5" fill="#0d0d14"/>
+            <text x="34" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#e0e0e8">O</text>
+            <text x="67" y="76" font-family="'JetBrains Mono', monospace" font-size="50" font-weight="700" fill="#00e5ff">1</text>
+          </svg>
+          <div>
+            <div style="font-size: 11px; color: #00e5ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Operator</div>
+            <div style="font-size: 12px; color: #e0e0e8; line-height: 1.6;">3 new requests since yesterday. One looks urgent — client asking about contract renewal. Want me to draft a response?</div>
+          </div>
+        </div>
+        <!-- Input -->
+        <div style="background: #12121c; border: 1px solid #1a1a2e; border-radius: 4px; padding: 10px 14px; font-size: 12px; color: #555570;">Ask the Operator...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: center; margin-top: 80px; padding-bottom: 40px; color: #555570; font-size: 11px; text-transform: uppercase; letter-spacing: 3px;">
+  Hover badges for glow effect
+</div>
+
+</body>
+</html>
