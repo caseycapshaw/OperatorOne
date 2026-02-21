@@ -1,21 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env sh
 # PostgreSQL Multi-Database Initialization Script
 # Creates separate databases and users for each service
 
 set -e
-set -u
 
-function create_user_and_database() {
+create_user_and_database() {
     local database=$1
-    local password_var="POSTGRES_${database^^}_PASSWORD"
-    local password="${!password_var:-}"
+    local upper_db=$(echo "$database" | tr '[:lower:]' '[:upper:]')
+    local password_var="POSTGRES_${upper_db}_PASSWORD"
+    eval "local password=\${$password_var:-}"
 
     if [ -z "$password" ]; then
         echo "ERROR: No password set for $database (expected env var $password_var)"
         echo "Set $password_var in your .env file"
         return 1
     fi
-    
+
     echo "Creating user and database: $database"
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
         CREATE USER $database WITH PASSWORD '$password';
@@ -23,7 +23,7 @@ function create_user_and_database() {
         GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
         ALTER DATABASE $database OWNER TO $database;
 EOSQL
-    
+
     # Grant schema permissions
     psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" <<-EOSQL
         GRANT ALL ON SCHEMA public TO $database;
@@ -59,11 +59,11 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "op1_audit" <<-EOSQ
         status VARCHAR(20),
         metadata JSONB
     );
-    
+
     CREATE INDEX idx_ai_interactions_timestamp ON ai_interactions(timestamp);
     CREATE INDEX idx_ai_interactions_user ON ai_interactions(user_id);
     CREATE INDEX idx_ai_interactions_tool ON ai_interactions(tool_used);
-    
+
     CREATE TABLE IF NOT EXISTS mcp_tool_calls (
         id SERIAL PRIMARY KEY,
         timestamp TIMESTAMPTZ DEFAULT NOW(),
@@ -76,7 +76,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "op1_audit" <<-EOSQ
         approved_by VARCHAR(255),
         approved_at TIMESTAMPTZ
     );
-    
+
     CREATE INDEX idx_mcp_calls_timestamp ON mcp_tool_calls(timestamp);
     CREATE INDEX idx_mcp_calls_tool ON mcp_tool_calls(tool_name);
 EOSQL

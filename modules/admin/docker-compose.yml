@@ -15,6 +15,7 @@ services:
     restart: unless-stopped
     environment:
       - PROJECT_DIR=/opt/op1
+      - LOG_DIR=/var/log/op1-admin
       - HTTP_PORT=3000
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - APPROVAL_API_TOKEN=${APPROVAL_API_TOKEN}
@@ -30,8 +31,8 @@ services:
       - ./scripts:/opt/op1/scripts:ro
       # Mount backup directory for read/write
       - ./backups:/opt/op1/backups
-      # Mount logs directory
-      - admin-logs:/opt/op1/logs
+      # Mount logs directory (outside the RO project mount)
+      - admin-logs:/var/log/op1-admin
     networks:
       - op1-backend
     labels:
@@ -47,18 +48,16 @@ services:
   # HTTP endpoint for Slack interactive messages
   # ─────────────────────────────────────────────────────────────
   approval-api:
-    image: node:20-alpine
+    build:
+      context: ./modules/admin/approval-api
+      dockerfile: Dockerfile
     container_name: op1-approval-api
     restart: unless-stopped
-    working_dir: /app
-    command: sh -c "npm install --production && node server.js"
     environment:
       - PORT=3001
       - MCP_SERVER_URL=http://admin-mcp-server:3000
       - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET}
       - APPROVAL_API_TOKEN=${APPROVAL_API_TOKEN}
-    volumes:
-      - ./modules/admin/approval-api:/app
     networks:
       - op1-backend
       - op1-frontend

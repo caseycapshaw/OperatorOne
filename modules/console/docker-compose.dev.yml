@@ -6,9 +6,12 @@ services:
     build:
       context: ./modules/console/app
       dockerfile: Dockerfile.dev
+    command: ["npx", "next", "dev"]
+    # NOTE: Source bind mounts removed — macOS Docker Desktop error -35
+    # ("Resource deadlock would occur") makes them unreliable.
+    # Source is baked into the image via COPY in Dockerfile.dev.
+    # Rebuild to pick up changes: docker compose ... up -d --build console
     volumes:
-      - ./modules/console/app/src:/app/src
-      - ./modules/console/app/public:/app/public
       - ./.env:/opt/op1/.env
     environment:
       - DATABASE_URL=postgresql://portal:${POSTGRES_PORTAL_PASSWORD}@postgres:5432/portal
@@ -45,7 +48,8 @@ services:
       - "traefik.http.routers.console.rule=Host(`console.localhost`)"
       - "traefik.http.routers.console.entrypoints=web"
       - "traefik.http.routers.console.tls=false"
-      - "traefik.http.routers.console.middlewares=web-chain@file"
+      - "traefik.http.routers.console.tls.certresolver="
+      - "traefik.http.routers.console.middlewares="
       - "traefik.http.services.console.loadbalancer.server.port=3000"
       - "traefik.docker.network=op1-frontend"
 

@@ -204,14 +204,11 @@ After services start, the **Console Setup Wizard** automates OAuth provider crea
    - The wizard launches automatically on first boot (detects missing OAuth config)
 
 2. **Complete the 5-step wizard:**
-
-| Step | Screenshot |
-|------|-----------|
-| **1. Authenticate** -- Enter the bootstrap password from `.env` | ![Step 1](docs/images/setup-step1.png) |
-| **2. Organization Identity** -- Set organization name, domain, and primary operator details | ![Step 2](docs/images/setup-step2.png) |
-| **3. Configure SSO** -- Auto-creates Console + Grafana OAuth2 providers in Authentik | ![Step 3](docs/images/setup-step3.png) |
-| **4. External Services** -- Optionally enter Anthropic API key, SMTP, Slack webhook | ![Step 4](docs/images/setup-step4.png) |
-| **5. Apply & Restart** -- Writes credentials to `.env` and restarts services | |
+   1. **Authenticate** -- Enter the bootstrap password from `.env`
+   2. **Organization Identity** -- Set organization name, domain, and primary operator details
+   3. **Configure SSO** -- Auto-creates Console + Grafana OAuth2 providers in Authentik
+   4. **External Services** -- Optionally enter Anthropic API key, SMTP, Slack webhook
+   5. **Apply & Restart** -- Writes credentials to `.env` and restarts services
 
 3. **After the wizard completes**, finish the remaining manual steps:
 
@@ -265,7 +262,12 @@ Modules extend the core stack with additional services. Both modules are include
 
 ### Console + AI Operations Agent
 
-![Console Dashboard](docs/images/console-dashboard.png)
+| | |
+|---|---|
+| ![Console Dashboard](docs/images/console-dashboard.png) | ![Console Operators](docs/images/console-operators.png) |
+| Dashboard with AI chat interface | AI operator management |
+| ![Console Login](docs/images/console-login.png) | ![Console Admin](docs/images/console-admin.png) |
+| SSO login via Authentik | Admin settings and integrations |
 
 The console module provides a client-facing operations dashboard with an **AI-powered chat interface** as the primary UX. The AI system uses a **supervisor/sub-agent architecture** — Operator One routes requests to specialized operators (Console, Workflow, System Admin) that each have their own tools. Custom and template agents can be added per-organization via the database.
 

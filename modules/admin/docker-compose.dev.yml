@@ -8,6 +8,7 @@ services:
       - "traefik.http.routers.approval-api.rule=Host(`api.localhost`) && PathPrefix(`/approvals`)"
       - "traefik.http.routers.approval-api.entrypoints=web"
       - "traefik.http.routers.approval-api.tls=false"
+      - "traefik.http.routers.approval-api.tls.certresolver="
       - "traefik.http.services.approval-api.loadbalancer.server.port=3001"
 
 networks:

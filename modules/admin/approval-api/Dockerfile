@@ -1,0 +1,10 @@
+# modules/admin/approval-api/Dockerfile
+# Approval API — HTTP endpoint for Slack interactive message callbacks
+
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install --omit=dev
+COPY server.js ./
+EXPOSE 3001
+CMD ["node", "server.js"]

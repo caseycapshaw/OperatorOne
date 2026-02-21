@@ -22,6 +22,7 @@ const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 // Configuration
 const CONFIG = {
   projectDir: process.env.PROJECT_DIR || '/opt/op1',
+  logDir: process.env.LOG_DIR || path.join(process.env.PROJECT_DIR || '/opt/op1', 'logs'),
   composeFile: 'docker-compose.yml',
   prodOverride: 'docker-compose.prod.yml',
   versionsFile: 'versions.yml',
@@ -381,7 +382,7 @@ async function requestHumanApproval(action, details) {
 }
 
 async function logUpdateEvent(event) {
-  const logPath = path.join(CONFIG.projectDir, 'logs', 'updates.jsonl');
+  const logPath = path.join(CONFIG.logDir, 'updates.jsonl');
   const entry = JSON.stringify({ ...event, timestamp: new Date().toISOString() }) + '\n';
   await writeFile(logPath, entry, { flag: 'a' });
 }
@@ -874,7 +875,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     // ─────────────────────────────────────────────────────────
     case 'get_update_history': {
-      const logPath = path.join(CONFIG.projectDir, 'logs', 'updates.jsonl');
+      const logPath = path.join(CONFIG.logDir, 'updates.jsonl');
       
       try {
         const content = await readFile(logPath, 'utf-8');
@@ -1044,7 +1045,7 @@ httpApp.get('/tools/check-updates', requireApprovalAuth, async (req, res) => {
 });
 
 httpApp.get('/tools/update-history', requireApprovalAuth, async (req, res) => {
-  const logPath = path.join(CONFIG.projectDir, 'logs', 'updates.jsonl');
+  const logPath = path.join(CONFIG.logDir, 'updates.jsonl');
 
   try {
     const content = await readFile(logPath, 'utf-8');

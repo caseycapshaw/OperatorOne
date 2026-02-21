@@ -15,7 +15,7 @@ RUN npm install --production
 COPY src/ ./src/
 
 # Create logs directory
-RUN mkdir -p /opt/op1/logs
+RUN mkdir -p /var/log/op1-admin
 
 # Expose HTTP API port for approval callbacks
 EXPOSE 3000

@@ -8,7 +8,6 @@ services:
     image: traefik:v3.6
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./config/traefik/dynamic:/etc/traefik/dynamic:ro
       - traefik-logs:/var/log/traefik
     command:
       - "--api.dashboard=true"
@@ -16,8 +15,6 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=op1-frontend"
-      - "--providers.file.directory=/etc/traefik/dynamic"
-      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--log.level=DEBUG"
       - "--accesslog=true"
@@ -33,18 +30,22 @@ services:
       - "traefik.http.routers.traefik-dashboard.entrypoints=web"
       - "traefik.http.routers.traefik-dashboard.service=api@internal"
       - "traefik.http.routers.traefik-dashboard.tls=false"
-      - "traefik.http.routers.traefik-dashboard.middlewares=authentik-auth@file"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver="
+      - "traefik.http.routers.traefik-dashboard.middlewares="
 
-  # Override all routers to use HTTP (must clear TLS labels from base)
+  # Override all routers to use HTTP (must clear TLS and middleware labels from base)
   n8n:
     environment:
       - N8N_SECURE_COOKIE=false
+      # Disable external hooks in dev (bind mount causes macOS Docker -35 errors)
+      - EXTERNAL_HOOK_FILES=
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.n8n.rule=Host(`automation.localhost`)"
       - "traefik.http.routers.n8n.entrypoints=web"
       - "traefik.http.routers.n8n.tls=false"
-      - "traefik.http.routers.n8n.middlewares=authentik-auth@file"
+      - "traefik.http.routers.n8n.tls.certresolver="
+      - "traefik.http.routers.n8n.middlewares="
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
       - "traefik.docker.network=op1-frontend"
 
@@ -56,6 +57,7 @@ services:
       - "traefik.http.routers.authentik.rule=Host(`auth.localhost`)"
       - "traefik.http.routers.authentik.entrypoints=web"
       - "traefik.http.routers.authentik.tls=false"
+      - "traefik.http.routers.authentik.tls.certresolver="
       - "traefik.http.services.authentik.loadbalancer.server.port=9000"
       - "traefik.docker.network=op1-frontend"
 
@@ -75,5 +77,6 @@ services:
       - "traefik.http.routers.grafana.rule=Host(`monitor.localhost`)"
       - "traefik.http.routers.grafana.entrypoints=web"
       - "traefik.http.routers.grafana.tls=false"
+      - "traefik.http.routers.grafana.tls.certresolver="
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.docker.network=op1-frontend"
