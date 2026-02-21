@@ -227,6 +227,12 @@ export const ticketComments = pgTable("ticket_comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+/**
+ * @deprecated Documents are now managed by Paperless-ngx.
+ * This table has no data (no write path ever existed).
+ * Kept for schema compatibility — will be removed in a future major version.
+ * Use the Paperless API via `paperlessClient` instead.
+ */
 export const documents = pgTable("documents", {
   id: uuid("id").defaultRandom().primaryKey(),
   organizationId: uuid("organization_id")

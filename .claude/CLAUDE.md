@@ -20,13 +20,14 @@ Internet → Traefik (ports 80/443)
               ├── automation.{DOMAIN}  → n8n (workflow automation) [SSO: forward auth]
               ├── monitor.{DOMAIN}     → Grafana (observability) [SSO: OAuth2]
               ├── console.{DOMAIN}      → Console (client dashboard) [SSO: OAuth2]
+              ├── docs.{DOMAIN}        → Paperless-ngx (documents) [SSO: forward auth]
               ├── traefik.{DOMAIN}     → Traefik dashboard [SSO: forward auth]
               └── approvals.{DOMAIN}   → Admin approval API (Slack webhooks)
 
 Internal (op1-backend network, not internet-exposed):
   OpenBao (8200) — secrets management (KV v2, service token auth)
-  PostgreSQL (5432) — shared by: openbao, n8n, authentik, console, op1_audit
-  Redis (6379) — shared by: authentik
+  PostgreSQL (5432) — shared by: openbao, n8n, authentik, console, paperless, op1_audit
+  Redis (6379) — shared by: authentik, paperless (key prefix isolation)
 ```
 
 ### Docker Networks
@@ -48,12 +49,14 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 docker compose -f docker-compose.yml -f docker-compose.dev.yml \
   -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
   -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
+  -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
   up -d
 
 # Prod (pinned versions, TLS, resource limits)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   -f modules/console/docker-compose.yml \
   -f modules/admin/docker-compose.yml \
+  -f modules/paperless/docker-compose.yml \
   up -d
 ```
 
@@ -74,6 +77,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 | Promtail | op1-promtail | grafana/promtail:3.0.0 | — | — |
 | Grafana | op1-grafana | grafana/grafana:11.0.0 | 3000 | monitor.{DOMAIN} |
 | Console | op1-console | (built from modules/console/app/) | 3000 | console.{DOMAIN} |
+| Paperless-ngx | op1-paperless | ghcr.io/paperless-ngx/paperless-ngx:2.14 | 8000 | docs.{DOMAIN} |
 | Admin MCP | admin-mcp-server | (built from mcp-servers/op1-admin/) | 3000 | — |
 | Approval API | admin-approval-api | (built from modules/admin/approval-api/) | 3001 | approvals.{DOMAIN} |
 
@@ -86,6 +90,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 | Service | Auth Method | Middleware | Notes |
 |---------|------------|------------|-------|
 | n8n | Forward auth | `authentik-auth@file` → `sso-web-chain@file` | Proxy provider in Authentik |
+| Paperless-ngx | Forward auth | `sso-web-chain@file` | Proxy provider in Authentik (same pattern as n8n) |
 | Traefik dashboard | Forward auth | `authentik-auth@file` | Proxy provider in Authentik |
 | Grafana | OAuth2/OIDC | `web-chain@file` | OAuth2 provider with custom `groups` scope mapping |
 | Console | OAuth2/OIDC | `web-chain@file` | OAuth2 provider, Auth.js handles sessions |
@@ -113,6 +118,7 @@ Created by `scripts/init-multiple-dbs.sh` on first boot:
 | n8n | n8n | n8n workflow automation |
 | authentik | authentik | Authentik identity provider |
 | console | console | Console app (Drizzle ORM) |
+| paperless | paperless | Paperless-ngx document management |
 | op1_audit | postgres | AI interaction and MCP call logging |
 
 The `op1_audit` database has two tables: `ai_interactions` and `mcp_tool_calls`, created by the init script. These are not yet populated by any service.
@@ -147,6 +153,15 @@ modules/<name>/
 - Mounts Docker socket for container management
 - Tools wired into Claude Code via `.mcp.json` at project root
 - Requires `APPROVAL_API_TOKEN` in `.env` for HTTP API authentication
+- **Status: Running, integrated into standard dev stack**
+
+**Paperless** (`modules/paperless/`):
+- Paperless-ngx document management with OCR and full-text search
+- Shares PostgreSQL (`paperless` database) and Redis (key prefix `paperless:`)
+- SSO via Authentik forward auth (same pattern as n8n)
+- Console AI agent accesses via REST API with token auth
+- 15 AI tools in the Documents Operator sub-agent
+- Console documents page reads from Paperless API
 - **Status: Running, integrated into standard dev stack**
 
 **Console** (`modules/console/`):
@@ -206,7 +221,8 @@ The AI system uses a **supervisor/sub-agent pattern** built on Vercel AI SDK's `
 ```
 User Message → Supervisor (Operator One)
                    │
-                   ├── delegate_to_console-manager → Console Operator (14 tools)
+                   ├── delegate_to_console-manager → Console Operator (16 tools)
+                   ├── delegate_to_documents-manager → Documents Operator (15 tools)
                    ├── delegate_to_workflow-manager → Workflow Operator (37 tools, admin+)
                    ├── delegate_to_system-admin → System Admin Operator (3 tools, admin+)
                    └── delegate_to_<custom-slug> → Custom/Template Agents (configurable tools)
@@ -219,15 +235,17 @@ User Message → Supervisor (Operator One)
 4. When supervisor delegates, `agent-factory.ts` creates a sub-agent with resolved tools + loaded skills
 5. Sub-agent executes, returns result to supervisor, which relays to user
 
-**54 total tools** across 4 categories:
+**69 total tools** across 5 categories:
 - Console Read (9): list/get requests, projects, tickets, documents, dashboard stats, activity search
 - Console Write (5): create request/ticket, update status, add comment
+- Paperless (15): documents (search/list/get/upload/update/delete), tags (list/create/delete), correspondents (list/create/delete), document types (list/create/delete)
 - n8n (37): full REST API coverage — workflows, executions, credentials, tags, variables, users, projects, source control, audit
 - System Admin (3): system status, check updates, update history
 
-**4 system agents** (always present, defined in `predefined.ts`):
+**5 system agents** (always present, defined in `predefined.ts`):
 - Operator One (supervisor) — routes requests, no direct tools
-- Console Operator — 14 console tools, all roles
+- Console Operator — 16 console tools (incl. Paperless search/list), all roles
+- Documents Operator — 15 Paperless tools, all roles
 - Workflow Operator — 37 n8n tools, admin+
 - System Admin Operator — 3 admin tools, admin+
 
@@ -250,11 +268,13 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/agents/types.ts` — AgentDefinition, AgentContext, SkillDefinition types
 - `modules/console/app/src/lib/ai/system-prompt.ts` — Role-aware system prompt builder
 - `modules/console/app/src/lib/ai/session-context.ts` — Gets authenticated user's orgId, clientId, role
+- `modules/console/app/src/lib/ai/paperless-client.ts` — Paperless-ngx REST API client
 - `modules/console/app/src/lib/ai/tools/index.ts` — `buildToolSet(role, orgId, clientId)` flat tool assembly (legacy path)
 - `modules/console/app/src/lib/ai/tools/console-read-tools.ts` — 9 read tools (all roles)
 - `modules/console/app/src/lib/ai/tools/console-write-tools.ts` — 5 write tools (member+)
 - `modules/console/app/src/lib/ai/tools/n8n-tools.ts` — 37 n8n tools (admin+)
 - `modules/console/app/src/lib/ai/tools/admin-tools.ts` — 3 system admin tools (admin+)
+- `modules/console/app/src/lib/ai/tools/paperless-tools.ts` — 15 Paperless-ngx tools (viewer/member/admin)
 - `modules/console/app/src/lib/ai/n8n-client.ts` — n8n REST API client
 - `modules/console/app/src/lib/ai/admin-client.ts` — Admin MCP HTTP API client
 - `modules/console/app/src/lib/ai/triage.ts` — Proactive triage logic (generateText, non-streaming)
@@ -381,6 +401,15 @@ User Message → Supervisor (Operator One)
 - Secrets stored at paths like `services/anthropic`, `services/openrouter`, `services/n8n` in OpenBao KV v2
 - Admin page at `/dashboard/admin` can write secrets to OpenBao via the console UI
 
+### Paperless-ngx
+- Shares Redis with Authentik but uses `PAPERLESS_REDIS_PREFIX=paperless:` for key isolation
+- For existing deployments, the `paperless` database must be created manually since `init-multiple-dbs.sh` only runs on first boot
+- `PAPERLESS_ENABLE_HTTP_REMOTE_USER=true` trusts `X-authentik-username` header — safe because Traefik strips client-supplied headers; only Authentik outpost sets it
+- API token must be generated manually in Paperless admin UI after first boot (`/admin/` → Auth Tokens)
+- Console reads the token via `getPaperlessApiToken()` (OpenBao `services/paperless` field `api_token`, env fallback `PAPERLESS_API_TOKEN`)
+- In dev, the `sso-web-chain` middleware is cleared (same as other services), so Paperless is accessible without Authentik
+- The old `documents` table in the console DB is deprecated — the `list_documents` tool now proxies through Paperless API
+
 ### Tailwind CSS 4
 - Uses `@theme` directive in globals.css instead of tailwind.config.ts for custom tokens
 - PostCSS config uses `@tailwindcss/postcss` plugin (not the old `tailwindcss` plugin)
@@ -423,6 +452,8 @@ User Message → Supervisor (Operator One)
 | AI system prompt | `modules/console/app/src/lib/ai/system-prompt.ts` |
 | OpenBao client | `modules/console/app/src/lib/openbao.ts` |
 | Secret reader | `modules/console/app/src/lib/secrets.ts` |
+| Paperless API client | `modules/console/app/src/lib/ai/paperless-client.ts` |
+| Paperless AI tools | `modules/console/app/src/lib/ai/tools/paperless-tools.ts` |
 | AI triage logic | `modules/console/app/src/lib/ai/triage.ts` |
 | Chat API route | `modules/console/app/src/app/api/chat/route.ts` |
 | Chat UI components | `modules/console/app/src/components/chat/` |
@@ -434,10 +465,13 @@ User Message → Supervisor (Operator One)
 | Admin form component | `modules/console/app/src/components/console/admin-form.tsx` |
 | Admin secrets API | `modules/console/app/src/app/api/admin/secrets/route.ts` |
 | Admin API route | `modules/console/app/src/app/api/admin/organization/route.ts` |
+| Paperless compose (prod) | `modules/paperless/docker-compose.yml` |
+| Paperless compose (dev) | `modules/paperless/docker-compose.dev.yml` |
 | SSO setup guide | `docs/sso-setup.md` |
 | Architecture doc | `docs/ARCHITECTURE.md` |
 | Update management doc | `docs/UPDATES.md` |
 | Agent updates doc | `docs/AGENT-ADMINISTERED-UPDATES.md` |
+| Paperless setup guide | `docs/paperless-setup.md` |
 | Next steps | `NEXT_STEPS.md` |
 
 ---

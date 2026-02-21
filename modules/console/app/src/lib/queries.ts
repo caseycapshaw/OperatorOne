@@ -8,10 +8,10 @@ import {
   milestones,
   tickets,
   ticketComments,
-  documents,
   activityLog,
 } from "@/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
+import { paperlessClient } from "@/lib/ai/paperless-client";
 
 // ─── Organization ────────────────────────────
 
@@ -32,7 +32,21 @@ export async function getDashboardData() {
   const orgId = await getCurrentOrgId();
   if (!orgId) return null;
 
-  const [recentRequests, activeProjects, recentDocuments, recentActivity] =
+  // Fetch Paperless documents separately with error fallback
+  let recentDocuments: Array<Record<string, unknown>> = [];
+  try {
+    const paperlessResult = await paperlessClient.listDocuments({
+      ordering: "-created",
+      page: 1,
+    });
+    if (paperlessResult && !("error" in paperlessResult)) {
+      recentDocuments = (paperlessResult.results ?? []).slice(0, 5);
+    }
+  } catch {
+    // Paperless unavailable — leave empty
+  }
+
+  const [recentRequests, activeProjects, recentActivity] =
     await Promise.all([
       db
         .select()
@@ -45,12 +59,6 @@ export async function getDashboardData() {
         .from(projects)
         .where(eq(projects.organizationId, orgId))
         .orderBy(desc(projects.updatedAt))
-        .limit(5),
-      db
-        .select()
-        .from(documents)
-        .where(eq(documents.organizationId, orgId))
-        .orderBy(desc(documents.createdAt))
         .limit(5),
       db
         .select()
@@ -213,12 +221,13 @@ export async function getTicket(id: string) {
 // ─── Documents ──────────────────────────────
 
 export async function getDocuments() {
-  const orgId = await getCurrentOrgId();
-  if (!orgId) return [];
-
-  return db
-    .select()
-    .from(documents)
-    .where(eq(documents.organizationId, orgId))
-    .orderBy(desc(documents.createdAt));
+  try {
+    const result = await paperlessClient.listDocuments({ ordering: "-created" });
+    if (result && !("error" in result)) {
+      return result.results ?? [];
+    }
+  } catch {
+    // Paperless unavailable
+  }
+  return [];
 }

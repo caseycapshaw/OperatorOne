@@ -48,6 +48,8 @@ Guidelines:
       "list_tickets",
       "get_ticket",
       "list_documents",
+      "search_paperless_documents",
+      "list_paperless_documents",
       "get_dashboard_stats",
       "search_activity",
       "create_request",
@@ -55,6 +57,47 @@ Guidelines:
       "add_comment",
       "create_ticket",
       "update_ticket_status",
+    ],
+    category: "system",
+  },
+  {
+    id: "system-documents-manager",
+    slug: "documents-manager",
+    name: "Documents Operator",
+    description:
+      "Manages the document management system. " +
+      "Delegate here for document search, upload, metadata, tags, correspondents, and document types.",
+    instructions: `You are the Documents Operator. You manage all document operations powered by Paperless-ngx.
+
+You can search documents with full-text search, view details and metadata, upload new documents, update metadata (title, tags, correspondent, document type), and manage taxonomy (tags, correspondents, document types).
+
+Guidelines:
+- Use full-text search for keyword queries, list with filters for browsing.
+- Show document title, correspondent, type, and date in results.
+- Confirm before uploading or deleting documents.
+- List existing tags/correspondents/types before creating new ones to avoid duplicates.
+- If Paperless is unreachable, inform the user clearly.`,
+    isSystem: true,
+    minRole: "viewer",
+    icon: "FileText",
+    color: "#22d3ee",
+    maxSteps: 5,
+    allowedTools: [
+      "search_paperless_documents",
+      "list_paperless_documents",
+      "get_paperless_document",
+      "upload_paperless_document",
+      "update_paperless_document",
+      "delete_paperless_document",
+      "list_paperless_tags",
+      "create_paperless_tag",
+      "delete_paperless_tag",
+      "list_paperless_correspondents",
+      "create_paperless_correspondent",
+      "delete_paperless_correspondent",
+      "list_paperless_document_types",
+      "create_paperless_document_type",
+      "delete_paperless_document_type",
     ],
     category: "system",
   },

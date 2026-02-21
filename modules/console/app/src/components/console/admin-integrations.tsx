@@ -17,11 +17,12 @@ interface SecretsResponse {
   anthropicApiKey: KeyStatus;
   n8nApiKey: KeyStatus;
   openrouterApiKey: KeyStatus;
+  paperlessApiToken: KeyStatus;
   aiProvider: "anthropic" | "openrouter";
   openbaoAvailable: boolean;
 }
 
-type ModalId = "anthropic" | "openrouter" | "n8n" | "slack" | "email" | "sms" | null;
+type ModalId = "anthropic" | "openrouter" | "n8n" | "paperless" | "slack" | "email" | "sms" | null;
 
 /* ── Key Settings Form (reused inside modals) ─ */
 
@@ -184,6 +185,7 @@ export function AdminIntegrations() {
   const anthropicStatus = secrets?.anthropicApiKey;
   const openrouterStatus = secrets?.openrouterApiKey;
   const n8nStatus = secrets?.n8nApiKey;
+  const paperlessStatus = secrets?.paperlessApiToken;
   const activeProvider = secrets?.aiProvider ?? "anthropic";
 
   return (
@@ -246,6 +248,19 @@ export function AdminIntegrations() {
                 : "Not configured"
             }
             onClick={() => setActiveModal("n8n")}
+          />
+          <IntegrationCard
+            name="Paperless-ngx"
+            subtitle="Document management"
+            icon="P"
+            accentColor="var(--color-neon-cyan)"
+            status={paperlessStatus?.configured ? "configured" : "not-configured"}
+            statusLabel={
+              paperlessStatus?.configured
+                ? `Connected (${paperlessStatus.source === "openbao" ? "OpenBao" : "ENV"})`
+                : "Not configured"
+            }
+            onClick={() => setActiveModal("paperless")}
           />
           <AddCard label="Add Tool" />
         </div>
@@ -388,6 +403,38 @@ export function AdminIntegrations() {
           openbaoAvailable={secrets?.openbaoAvailable ?? false}
           onSaved={fetchSecrets}
         />
+      </SettingsModal>
+
+      <SettingsModal
+        open={activeModal === "paperless"}
+        onClose={() => setActiveModal(null)}
+        title="Paperless-ngx Settings"
+        accentColor="var(--color-neon-cyan)"
+      >
+        <div className="space-y-5">
+          <div className="space-y-2 border border-grid-border bg-grid-black/30 p-3">
+            <p className="text-xs text-text-muted">
+              <span className="text-text-primary">Paperless-ngx</span> provides
+              document management with OCR and full-text search. The AI agent uses
+              an API token to manage documents.
+            </p>
+            <p className="text-xs text-text-muted">
+              Generate a token in the Paperless admin UI at{" "}
+              <span className="font-mono text-text-primary">
+                docs.{"{"}&lt;domain&gt;{"}"}/admin/
+              </span>{" "}
+              &rarr; Auth Tokens
+            </p>
+          </div>
+          <KeySettingsForm
+            label="API Token"
+            placeholder="Paperless API token"
+            bodyKey="paperlessApiToken"
+            status={paperlessStatus ?? null}
+            openbaoAvailable={secrets?.openbaoAvailable ?? false}
+            onSaved={fetchSecrets}
+          />
+        </div>
       </SettingsModal>
 
       <SettingsModal

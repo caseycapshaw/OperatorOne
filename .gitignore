@@ -22,6 +22,9 @@ versions.yml
 # Node
 node_modules/
 
+# Branding assets (local only)
+Branding/
+
 # macOS
 .DS_Store
 

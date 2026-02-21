@@ -3,6 +3,7 @@ import { consoleReadTools } from "../tools/console-read-tools";
 import { consoleWriteTools } from "../tools/console-write-tools";
 import { n8nTools } from "../tools/n8n-tools";
 import { adminTools } from "../tools/admin-tools";
+import { paperlessTools } from "../tools/paperless-tools";
 import { hasMinRole } from "@/lib/roles";
 import type { AgentContext, Role } from "./types";
 
@@ -89,6 +90,29 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
   { name: "get_system_status", description: "Get system component health", minRole: "admin", category: "System Admin" },
   { name: "check_updates", description: "Check for available updates", minRole: "admin", category: "System Admin" },
   { name: "get_update_history", description: "Get update/rollback history", minRole: "admin", category: "System Admin" },
+
+  // Paperless (Read)
+  { name: "search_paperless_documents", description: "Full-text search across Paperless documents", minRole: "viewer", category: "Paperless (Read)" },
+  { name: "list_paperless_documents", description: "List Paperless documents with filters", minRole: "viewer", category: "Paperless (Read)" },
+  { name: "get_paperless_document", description: "Get full document details from Paperless", minRole: "viewer", category: "Paperless (Read)" },
+
+  // Paperless (Write)
+  { name: "upload_paperless_document", description: "Upload a document to Paperless", minRole: "member", category: "Paperless (Write)" },
+  { name: "update_paperless_document", description: "Update document metadata in Paperless", minRole: "member", category: "Paperless (Write)" },
+  { name: "delete_paperless_document", description: "Delete a document from Paperless", minRole: "admin", category: "Paperless (Write)" },
+
+  // Paperless (Tags)
+  { name: "list_paperless_tags", description: "List all Paperless tags", minRole: "viewer", category: "Paperless (Tags)" },
+  { name: "create_paperless_tag", description: "Create a Paperless tag", minRole: "member", category: "Paperless (Tags)" },
+  { name: "delete_paperless_tag", description: "Delete a Paperless tag", minRole: "admin", category: "Paperless (Tags)" },
+
+  // Paperless (Meta)
+  { name: "list_paperless_correspondents", description: "List Paperless correspondents", minRole: "viewer", category: "Paperless (Meta)" },
+  { name: "create_paperless_correspondent", description: "Create a Paperless correspondent", minRole: "member", category: "Paperless (Meta)" },
+  { name: "delete_paperless_correspondent", description: "Delete a Paperless correspondent", minRole: "admin", category: "Paperless (Meta)" },
+  { name: "list_paperless_document_types", description: "List Paperless document types", minRole: "viewer", category: "Paperless (Meta)" },
+  { name: "create_paperless_document_type", description: "Create a Paperless document type", minRole: "member", category: "Paperless (Meta)" },
+  { name: "delete_paperless_document_type", description: "Delete a Paperless document type", minRole: "admin", category: "Paperless (Meta)" },
 ];
 
 function buildAllTools(
@@ -97,6 +121,9 @@ function buildAllTools(
 ): Record<string, unknown> {
   const tools: Record<string, unknown> = {};
   Object.assign(tools, consoleReadTools(ctx.orgId));
+  // Paperless read tools are available to all roles; role filtering
+  // happens per-tool via the TOOL_CATALOG minRole entries
+  Object.assign(tools, paperlessTools());
   if (hasMinRole(ctx.role, "member")) {
     Object.assign(tools, consoleWriteTools(ctx.orgId, ctx.clientId, ctx.role));
   }

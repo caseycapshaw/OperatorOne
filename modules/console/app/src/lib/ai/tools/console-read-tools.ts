@@ -8,9 +8,9 @@ import {
   milestones,
   tickets,
   ticketComments,
-  documents,
   activityLog,
 } from "@/db/schema";
+import { paperlessClient } from "../paperless-client";
 import { eq, desc, and, sql, ilike, or } from "drizzle-orm";
 
 export function consoleReadTools(orgId: string) {
@@ -209,26 +209,29 @@ export function consoleReadTools(orgId: string) {
     }),
 
     list_documents: tool({
-      description: "List documents for the organization",
+      description: "List recent documents from the document management system (Paperless-ngx)",
       inputSchema: z.object({
         limit: z.number().min(1).max(50).default(10),
       }),
       execute: async ({ limit }) => {
-        const results = await db
-          .select()
-          .from(documents)
-          .where(eq(documents.organizationId, orgId))
-          .orderBy(desc(documents.createdAt))
-          .limit(limit);
-
-        return results.map((d) => ({
-          id: d.id,
-          name: d.name,
-          description: d.description,
-          mimeType: d.mimeType,
-          fileSize: d.fileSize,
-          createdAt: d.createdAt?.toISOString(),
-        }));
+        try {
+          const result = await paperlessClient.listDocuments({
+            ordering: "-created",
+          });
+          if (result && !("error" in result)) {
+            return (result.results ?? []).slice(0, limit).map((d: Record<string, unknown>) => ({
+              id: d.id,
+              title: d.title,
+              correspondent: d.correspondent,
+              document_type: d.document_type,
+              tags: d.tags,
+              created: d.created,
+            }));
+          }
+          return result;
+        } catch {
+          return { error: "Paperless-ngx is unavailable" };
+        }
       },
     }),
 

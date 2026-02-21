@@ -38,12 +38,15 @@ export async function GET() {
   let n8nSource: "openbao" | "env" | "none" = "none";
   let openrouterKey = "";
   let openrouterSource: "openbao" | "env" | "none" = "none";
+  let paperlessToken = "";
+  let paperlessSource: "openbao" | "env" | "none" = "none";
 
   if (openbaoAvailable) {
-    const [anthropicSecret, n8nSecret, openrouterSecret] = await Promise.all([
+    const [anthropicSecret, n8nSecret, openrouterSecret, paperlessSecret] = await Promise.all([
       readSecret("services/anthropic"),
       readSecret("services/n8n"),
       readSecret("services/openrouter"),
+      readSecret("services/paperless"),
     ]);
     if (anthropicSecret?.api_key) {
       anthropicKey = anthropicSecret.api_key;
@@ -56,6 +59,10 @@ export async function GET() {
     if (openrouterSecret?.api_key) {
       openrouterKey = openrouterSecret.api_key;
       openrouterSource = "openbao";
+    }
+    if (paperlessSecret?.api_token) {
+      paperlessToken = paperlessSecret.api_token;
+      paperlessSource = "openbao";
     }
   }
 
@@ -74,10 +81,16 @@ export async function GET() {
     openrouterSource = "env";
   }
 
+  if (!paperlessToken && process.env.PAPERLESS_API_TOKEN) {
+    paperlessToken = process.env.PAPERLESS_API_TOKEN;
+    paperlessSource = "env";
+  }
+
   return NextResponse.json({
     anthropicApiKey: resolveKeyStatus(anthropicKey, anthropicSource),
     n8nApiKey: resolveKeyStatus(n8nKey, n8nSource),
     openrouterApiKey: resolveKeyStatus(openrouterKey, openrouterSource),
+    paperlessApiToken: resolveKeyStatus(paperlessToken, paperlessSource),
     aiProvider: getActiveProvider(),
     openbaoAvailable,
   });
@@ -98,6 +111,7 @@ export async function PATCH(request: Request) {
       anthropicApiKey?: string;
       n8nApiKey?: string;
       openrouterApiKey?: string;
+      paperlessApiToken?: string;
     };
 
     if (body.anthropicApiKey !== undefined) {
@@ -178,6 +192,33 @@ export async function PATCH(request: Request) {
       const openbaoAvailable = await checkHealth();
       if (openbaoAvailable) {
         const written = await writeSecret("services/openrouter", { api_key: key });
+        if (!written) {
+          return NextResponse.json(
+            { error: "Failed to write secret to OpenBao" },
+            { status: 500 },
+          );
+        }
+        return NextResponse.json({ success: true, source: "openbao" });
+      }
+
+      return NextResponse.json(
+        { error: "OpenBao is not available. Cannot save secrets." },
+        { status: 503 },
+      );
+    }
+
+    if (body.paperlessApiToken !== undefined) {
+      const token = body.paperlessApiToken.trim();
+      if (!token) {
+        return NextResponse.json(
+          { error: "API token cannot be empty" },
+          { status: 400 },
+        );
+      }
+
+      const openbaoAvailable = await checkHealth();
+      if (openbaoAvailable) {
+        const written = await writeSecret("services/paperless", { api_token: token });
         if (!written) {
           return NextResponse.json(
             { error: "Failed to write secret to OpenBao" },

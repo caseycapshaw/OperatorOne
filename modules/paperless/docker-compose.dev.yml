@@ -1,0 +1,22 @@
+# modules/paperless/docker-compose.dev.yml
+# Dev overrides: HTTP, docs.localhost, no TLS
+
+services:
+  paperless:
+    environment:
+      - PAPERLESS_URL=http://docs.localhost
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperless.rule=Host(`docs.localhost`)"
+      - "traefik.http.routers.paperless.entrypoints=web"
+      - "traefik.http.routers.paperless.tls=false"
+      - "traefik.http.routers.paperless.tls.certresolver="
+      - "traefik.http.routers.paperless.middlewares="
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=op1-frontend"
+
+networks:
+  op1-frontend:
+    external: true
+  op1-backend:
+    external: true

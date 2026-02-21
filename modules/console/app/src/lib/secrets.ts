@@ -42,6 +42,14 @@ export async function getOpenRouterApiKey(): Promise<string | undefined> {
   return process.env.OPENROUTER_API_KEY || undefined;
 }
 
+export async function getPaperlessApiToken(): Promise<string | undefined> {
+  if (await isOpenBaoAvailable()) {
+    const secret = await readSecret("services/paperless");
+    if (secret?.api_token) return secret.api_token;
+  }
+  return process.env.PAPERLESS_API_TOKEN || undefined;
+}
+
 export async function getOpenBaoStatus(): Promise<boolean> {
   return isOpenBaoAvailable();
 }

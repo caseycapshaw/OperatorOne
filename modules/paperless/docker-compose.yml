@@ -1,0 +1,68 @@
+# modules/paperless/docker-compose.yml
+# Paperless-ngx document management system
+# Shares PostgreSQL and Redis from the core stack
+
+services:
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.14
+    container_name: op1-paperless
+    restart: unless-stopped
+    environment:
+      # PostgreSQL (shared instance, dedicated database)
+      - PAPERLESS_DBENGINE=postgresql
+      - PAPERLESS_DBHOST=postgres
+      - PAPERLESS_DBPORT=5432
+      - PAPERLESS_DBNAME=paperless
+      - PAPERLESS_DBUSER=paperless
+      - PAPERLESS_DBPASS=${POSTGRES_PAPERLESS_PASSWORD}
+      # Redis (shared instance, key prefix isolation)
+      - PAPERLESS_REDIS=redis://redis:6379
+      - PAPERLESS_REDIS_PREFIX=paperless:
+      # Security
+      - PAPERLESS_SECRET_KEY=${PAPERLESS_SECRET_KEY}
+      - PAPERLESS_ADMIN_USER=${PAPERLESS_ADMIN_USER:-admin}
+      - PAPERLESS_ADMIN_PASSWORD=${PAPERLESS_ADMIN_PASSWORD}
+      # SSO via Authentik forward auth (trusts X-authentik-username header)
+      - PAPERLESS_ENABLE_HTTP_REMOTE_USER=true
+      - PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME=HTTP_X_AUTHENTIK_USERNAME
+      # General
+      - PAPERLESS_TIME_ZONE=${TIMEZONE:-America/Denver}
+      - PAPERLESS_OCR_LANGUAGE=eng
+      - PAPERLESS_URL=https://docs.${DOMAIN}
+    volumes:
+      - paperless-data:/usr/src/paperless/data
+      - paperless-media:/usr/src/paperless/media
+      - paperless-consume:/usr/src/paperless/consume
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - op1-backend
+      - op1-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperless.rule=Host(`docs.${DOMAIN}`)"
+      - "traefik.http.routers.paperless.entrypoints=websecure"
+      - "traefik.http.routers.paperless.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.paperless.middlewares=sso-web-chain@file"
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=op1-frontend"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  paperless-data:
+  paperless-media:
+  paperless-consume:
+
+networks:
+  op1-frontend:
+    external: true
+  op1-backend:
+    external: true
