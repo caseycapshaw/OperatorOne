@@ -24,6 +24,8 @@
 
 Small and mid-sized businesses are drowning in SaaS sprawl. A typical 10-person company juggles separate tools for email, calendars, CRM, invoicing, project management, document storage, and communication -- each with its own login, its own interface, and its own monthly bill. Nobody has a complete picture of what's happening across the business. The owner becomes the human integration layer, manually copying data between systems and answering the same status questions over and over.
 
+And most AI tools today make this worse, not better. They're built for individual productivity -- one person, one chat window, one set of permissions. They don't address how teams actually collaborate: shared context, role-based access, coordinated workflows across people with different responsibilities. A business doesn't need five employees each talking to their own disconnected AI. It needs one AI that understands the whole operation and works with the entire team.
+
 Meanwhile, enterprise companies are spending millions building AI-powered operations platforms that unify everything behind a single interface. SMBs can't afford that, so they stay stuck in tab-switching purgatory.
 
 ## What This Makes Possible
