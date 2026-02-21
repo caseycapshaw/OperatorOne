@@ -5,7 +5,7 @@ This guide walks through the Authentik configuration needed to enable SSO across
 > **Setup Wizard:** Steps 5 (Grafana OAuth) and 10 (Console OAuth) are now **automated by the Console Setup Wizard**. On first boot, visit `console.localhost` and the 5-step wizard will capture organization identity, create both OAuth2 providers, copy credentials to `.env`, and restart services. You only need this guide for forward auth setup (steps 3-4), user/group management (steps 6-7), or troubleshooting.
 
 **SSO Strategy:**
-- **Forward Auth** (Traefik middleware) — n8n, Traefik dashboard
+- **Forward Auth** (Traefik middleware) — n8n, Paperless-ngx, Traefik dashboard
 - **OAuth2/OIDC** (native integration) — Grafana, Console (automated by setup wizard)
 - **Internal only** — OpenBao (no Traefik exposure, backend network only — no SSO needed)
 
@@ -141,6 +141,19 @@ You'll assign applications to the outpost after creating the providers below.
 2. Edit the embedded outpost
 3. Add `Traefik Dashboard` to the providers list
 4. Click **Update**
+
+---
+
+## 4b. Create Forward Auth Provider & Application for Paperless-ngx
+
+Paperless uses the same forward auth pattern as n8n. See [Paperless Setup Guide](paperless-setup.md#5-configure-sso-authentik-forward-auth) for detailed steps.
+
+**Summary:**
+1. Create a **Proxy Provider** named `Paperless` with forward auth (single application) mode, external URL `https://docs.<DOMAIN>` (or `http://docs.localhost` for dev)
+2. Create an **Application** named `Paperless` with slug `paperless`, linked to the proxy provider
+3. Add the application to the **Embedded Outpost**
+
+No code changes needed — the `sso-web-chain@file` Traefik middleware handles authentication.
 
 ---
 

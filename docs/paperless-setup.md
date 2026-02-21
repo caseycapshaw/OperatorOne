@@ -105,13 +105,13 @@ Paperless uses the same forward auth pattern as n8n:
 
 No code changes needed — the `sso-web-chain@file` Traefik middleware handles authentication.
 
-**Note:** In dev mode, the SSO middleware is cleared (`middlewares=`), so Paperless is accessible without Authentik.
+**Note:** Unlike other services, Paperless has SSO enabled in dev mode (`sso-web-chain@file` middleware). The Authentik embedded outpost must have `authentik_host` set to `http://auth.localhost` for browser redirects to work correctly.
 
 ## 6. Verify
 
 - `docs.<domain>` (or `docs.localhost`) loads the Paperless UI
 - Unauthenticated users are redirected to Authentik (prod only)
-- Console Documents page (`/dashboard/documents`) shows Paperless documents
+- Console sidebar "Documents" link opens Paperless in a new tab
 - AI agent can search documents: "search my documents for invoice"
 
 ---

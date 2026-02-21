@@ -103,7 +103,7 @@ Defined in `config/traefik/dynamic/middleware.yml`:
 | Chain | Middlewares | Used By |
 |-------|-----------|---------|
 | `web-chain@file` | security-headers, compress | Console, Grafana |
-| `sso-web-chain@file` | authentik-auth, security-headers, compress | n8n, Traefik dashboard |
+| `sso-web-chain@file` | authentik-auth, security-headers, compress | n8n, Paperless-ngx, Traefik dashboard |
 | `ai-chain@file` | ai-ratelimit, security-headers, compress, request-limit | AI endpoints (future) |
 
 ---
@@ -264,7 +264,7 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/agents/agent-registry.ts` — Loads agents, builds delegation tools, handles DB overrides
 - `modules/console/app/src/lib/ai/agents/agent-factory.ts` — Creates sub-agent ToolLoopAgent with resolved tools + skills
 - `modules/console/app/src/lib/ai/agents/predefined.ts` — System + template agent definitions
-- `modules/console/app/src/lib/ai/agents/tool-registry.ts` — Centralized tool catalog (54 entries) with role filtering
+- `modules/console/app/src/lib/ai/agents/tool-registry.ts` — Centralized tool catalog (69 entries) with role filtering
 - `modules/console/app/src/lib/ai/agents/types.ts` — AgentDefinition, AgentContext, SkillDefinition types
 - `modules/console/app/src/lib/ai/system-prompt.ts` — Role-aware system prompt builder
 - `modules/console/app/src/lib/ai/session-context.ts` — Gets authenticated user's orgId, clientId, role
@@ -359,9 +359,12 @@ User Message → Supervisor (Operator One)
 ### Traefik
 - Empty `services: {}` or `routers:` with only comments in dynamic YAML causes the **entire file provider to fail** silently. Only visible in DEBUG logs. Fix: remove unused top-level keys.
 - Routers with `tls.certresolver` in base compose won't match HTTP entrypoints in dev. Dev override MUST set `tls=false`.
+- The dev override (`docker-compose.dev.yml`) includes the file provider (`--providers.file.directory`) and volume mount for `config/traefik/dynamic/` — required for `sso-web-chain@file` middleware to work in dev.
 
 ### Authentik (2024.12)
 - Bootstrap token for dev: `dev-bootstrap-token` (set in docker-compose.dev.yml)
+- `AUTHENTIK_HOST=http://auth.localhost` is set in dev override — required for the embedded outpost to generate browser-facing redirect URLs (without it, redirects go to `0.0.0.0:9000`)
+- Embedded Outpost config: `authentik_host` must be set to the browser-facing URL (`http://auth.localhost`) via API — `authentik_host_browser` is ignored by the embedded outpost in 2024.12
 - API base: `http://auth.localhost/api/v3/`
 - Scope mappings: `/api/v3/propertymappings/provider/scope/` (NOT `/propertymappings/scope/`)
 - When creating OAuth2 providers via API:
@@ -407,7 +410,7 @@ User Message → Supervisor (Operator One)
 - `PAPERLESS_ENABLE_HTTP_REMOTE_USER=true` trusts `X-authentik-username` header — safe because Traefik strips client-supplied headers; only Authentik outpost sets it
 - API token must be generated manually in Paperless admin UI after first boot (`/admin/` → Auth Tokens)
 - Console reads the token via `getPaperlessApiToken()` (OpenBao `services/paperless` field `api_token`, env fallback `PAPERLESS_API_TOKEN`)
-- In dev, the `sso-web-chain` middleware is cleared (same as other services), so Paperless is accessible without Authentik
+- In dev, the `sso-web-chain@file` middleware is enabled for Paperless (unlike n8n/Traefik which clear it). SSO works in dev via the embedded outpost with `authentik_host=http://auth.localhost`
 - The old `documents` table in the console DB is deprecated — the `list_documents` tool now proxies through Paperless API
 
 ### Tailwind CSS 4

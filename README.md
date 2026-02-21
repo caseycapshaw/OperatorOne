@@ -98,10 +98,13 @@ operatorone/
 │   │   ├── docker-compose.yml   # AI-administered update module
 │   │   ├── docker-compose.dev.yml # Admin dev overrides (HTTP, no TLS)
 │   │   └── approval-api/        # Slack webhook receiver for update approvals
-│   └── console/
-│       ├── docker-compose.yml   # Console (prod)
-│       ├── docker-compose.dev.yml # Console (dev overrides)
-│       └── app/                 # Next.js 15 application
+│   ├── console/
+│   │   ├── docker-compose.yml   # Console (prod)
+│   │   ├── docker-compose.dev.yml # Console (dev overrides)
+│   │   └── app/                 # Next.js 15 application
+│   └── paperless/
+│       ├── docker-compose.yml   # Paperless-ngx (prod)
+│       └── docker-compose.dev.yml # Paperless (dev overrides)
 │           └── src/
 │               ├── lib/ai/      # AI agent: system prompt, tools, clients, triage
 │               ├── lib/setup*.ts       # Setup wizard utilities (auth, env, Authentik client)
@@ -137,6 +140,7 @@ operatorone/
     ├── UPDATES.md               # Update management strategy and procedures
     ├── AGENT-ADMINISTERED-UPDATES.md  # AI agent self-administration system
     ├── sso-setup.md             # Authentik SSO configuration guide
+    ├── paperless-setup.md       # Paperless-ngx module setup guide
     └── images/                  # Screenshots and diagrams
 ```
 
@@ -165,10 +169,12 @@ chmod +x scripts/generate-secrets.sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml \
   -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
   -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
+  -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
   up -d
 
 # 5. Access services at *.localhost:
 #   - Console:    http://console.localhost
+#   - Documents:  http://docs.localhost
 #   - Automation: http://automation.localhost
 #   - SSO:        http://auth.localhost
 #   - Traefik:    http://traefik.localhost
@@ -187,6 +193,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml \
 docker compose -f docker-compose.yml -f docker-compose.prod.yml \
   -f modules/console/docker-compose.yml \
   -f modules/admin/docker-compose.yml \
+  -f modules/paperless/docker-compose.yml \
   up -d
 
 # 4. Wait for services to initialize (2-3 minutes)
@@ -194,6 +201,7 @@ docker compose logs -f
 
 # 5. Access services:
 #   - Console:    https://console.yourdomain.com
+#   - Documents:  https://docs.yourdomain.com
 #   - Automation: https://automation.yourdomain.com
 #   - SSO:        https://auth.yourdomain.com
 ```
@@ -228,9 +236,10 @@ After services start, the **Console Setup Wizard** automates OAuth provider crea
 | **OpenBao** | Centralized secrets management (internal only) | `openbao` |
 | **n8n** | Workflow automation, integrations (500+ connectors) | `n8n` |
 | **Authentik** | Identity provider, SSO, forward auth | `authentik-server`, `authentik-worker` |
-| **PostgreSQL** | Shared database for OpenBao, n8n, Authentik, Console, and audit logs | `postgres` |
-| **Redis** | Shared cache/queue for Authentik | `redis` |
+| **PostgreSQL** | Shared database for OpenBao, n8n, Authentik, Console, Paperless, and audit logs | `postgres` |
+| **Redis** | Shared cache/queue for Authentik and Paperless | `redis` |
 | **Console** | Client dashboard with AI chat agent, requests, projects, tickets | `console` |
+| **Paperless-ngx** | Document management with OCR and full-text search | `paperless` |
 
 ### Observability Stack (Optional)
 
@@ -261,6 +270,7 @@ Modules extend the core stack with additional services. Both modules are include
 |--------|--------|-------------|
 | `admin` | Implemented | AI-administered system updates via MCP server + HTTP API. See [Agent-Administered Updates](docs/AGENT-ADMINISTERED-UPDATES.md). |
 | `console` | Implemented | Client-facing operations hub with AI chat agent. Next.js 15, Vercel AI SDK v6, Auth.js + Authentik SSO, Drizzle ORM. See [SSO Setup](docs/sso-setup.md#10-create-oauth2-provider--application-for-console). |
+| `paperless` | Implemented | Document management powered by Paperless-ngx with OCR, full-text search, and 15 AI tools via the Documents Operator sub-agent. See [Paperless Setup](docs/paperless-setup.md). |
 
 ### Console + AI Operations Agent
 
@@ -274,9 +284,9 @@ Modules extend the core stack with additional services. Both modules are include
 The console module provides a client-facing operations dashboard with an **AI-powered chat interface** as the primary UX. The AI system uses a **supervisor/sub-agent architecture** — Operator One routes requests to specialized operators (Console, Workflow, System Admin) that each have their own tools. Custom and template agents can be added per-organization via the database.
 
 **Key features:**
-- **54 role-gated tools**: 9 console read (all roles), 5 console write (member+), 37 n8n (admin+), 3 system admin (admin+)
+- **69 role-gated tools**: 9 console read (all roles), 5 console write (member+), 15 Paperless (viewer/member/admin), 37 n8n (admin+), 3 system admin (admin+)
 - **Supervisor/delegation pattern**: Operator One delegates to sub-agents via `delegate_to_<slug>` tools (ToolLoopAgent from Vercel AI SDK)
-- **4 system agents**: Operator One (supervisor), Console Operator, Workflow Operator, System Admin Operator
+- **5 system agents**: Operator One (supervisor), Console Operator, Documents Operator, Workflow Operator, System Admin Operator
 - **4 template agents** (installable per-org): Marketing, Customer Success, Accounting, Website Operator
 - **DB-backed extensions**: custom agents, agent skills (knowledge blocks), custom HTTP tools — all per-org
 - Streaming chat with conversation persistence and history
@@ -388,6 +398,8 @@ docker compose logs -f n8n
 | `modules/console/docker-compose.dev.yml` | Console dev overrides: hot-reload, Docker-internal auth URLs. | Local development. |
 | `modules/admin/docker-compose.yml` | Admin MCP server + approval API for AI-managed updates. | Always included. |
 | `modules/admin/docker-compose.dev.yml` | Admin dev overrides: HTTP entrypoint, no TLS for approval API. | Local development. |
+| `modules/paperless/docker-compose.yml` | Paperless-ngx document management with OCR. | Always included. |
+| `modules/paperless/docker-compose.dev.yml` | Paperless dev overrides: HTTP, `docs.localhost`, SSO via forward auth. | Local development. |
 
 ## Cost Estimate
 
@@ -414,6 +426,7 @@ docker compose logs -f n8n
 - [Update Management](docs/UPDATES.md) -- version pinning, update procedures, rollback
 - [Agent-Administered Updates](docs/AGENT-ADMINISTERED-UPDATES.md) -- AI-managed system updates via MCP
 - [SSO Setup Guide](docs/sso-setup.md) -- Authentik configuration for forward auth and OAuth2 across all services (automated by the setup wizard for Console + Grafana)
+- [Paperless-ngx Setup](docs/paperless-setup.md) -- Document management module setup, API token, SSO, and AI agent tools
 
 ## License
 

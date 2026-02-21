@@ -8,6 +8,7 @@ services:
     image: traefik:v3.6
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik/dynamic:/etc/traefik/dynamic:ro
       - traefik-logs:/var/log/traefik
     command:
       - "--api.dashboard=true"
@@ -15,6 +16,8 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=op1-frontend"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
       - "--log.level=DEBUG"
       - "--accesslog=true"
@@ -52,6 +55,7 @@ services:
   authentik-server:
     environment:
       - AUTHENTIK_BOOTSTRAP_TOKEN=dev-bootstrap-token
+      - AUTHENTIK_HOST=http://auth.localhost
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.authentik.rule=Host(`auth.localhost`)"

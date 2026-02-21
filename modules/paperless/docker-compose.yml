@@ -17,7 +17,7 @@ services:
       - PAPERLESS_DBPASS=${POSTGRES_PAPERLESS_PASSWORD}
       # Redis (shared instance, key prefix isolation)
       - PAPERLESS_REDIS=redis://redis:6379
-      - PAPERLESS_REDIS_PREFIX=paperless:
+      - "PAPERLESS_REDIS_PREFIX=paperless:"
       # Security
       - PAPERLESS_SECRET_KEY=${PAPERLESS_SECRET_KEY}
       - PAPERLESS_ADMIN_USER=${PAPERLESS_ADMIN_USER:-admin}
@@ -50,7 +50,7 @@ services:
       - "traefik.http.services.paperless.loadbalancer.server.port=8000"
       - "traefik.docker.network=op1-frontend"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8000"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -247,6 +247,7 @@ Browser → Traefik (console.${DOMAIN}) → Next.js App
                                                 │
                                                 ├── streamText → Claude API (streaming)
                                                 ├── Console Tools → PostgreSQL (Drizzle)
+                                                ├── Paperless Tools → Paperless-ngx REST API
                                                 ├── n8n Tools → n8n REST API
                                                 └── Admin Tools → Admin MCP HTTP API
 ```
@@ -258,17 +259,18 @@ The AI system uses a **supervisor/delegation pattern** built on Vercel AI SDK's 
 ```
 User Message → Supervisor (Operator One)
                    │
-                   ├── delegate_to_console-manager → Console Operator (14 tools)
+                   ├── delegate_to_console-manager → Console Operator (16 tools)
+                   ├── delegate_to_documents-manager → Documents Operator (15 tools)
                    ├── delegate_to_workflow-manager → Workflow Operator (37 tools, admin+)
                    ├── delegate_to_system-admin → System Admin Operator (3 tools, admin+)
                    └── delegate_to_<custom-slug> → Custom/Template Agents
 ```
 
-- **54 role-gated tools**: 9 console read (all roles), 5 console write (member+), 37 n8n (admin+), 3 system admin (admin+)
-- **4 system agents** (always present): Operator One (supervisor), Console Operator, Workflow Operator, System Admin Operator
+- **69 role-gated tools**: 9 console read (all roles), 5 console write (member+), 15 Paperless (viewer/member/admin), 37 n8n (admin+), 3 system admin (admin+)
+- **5 system agents** (always present): Operator One (supervisor), Console Operator, Documents Operator, Workflow Operator, System Admin Operator
 - **4 template agents** (installable per-org): Marketing, Customer Success, Accounting, Website Operator
 - **DB-backed extensions**: custom agents (`agents` table), agent skills (`agent_skills` table), custom HTTP tools (`custom_tools` table)
-- **Tool registry**: centralized catalog (`tool-registry.ts`) mapping 54 tool names → implementations with role enforcement
+- **Tool registry**: centralized catalog (`tool-registry.ts`) mapping 69 tool names → implementations with role enforcement
 - **Streaming chat** with conversation persistence (PostgreSQL-backed)
 - **Proactive triage**: fire-and-forget `generateText` call when requests/tickets are created, auto-adds AI comment
 - **Role hierarchy**: viewer → member → admin → owner, each level unlocks more tools
@@ -314,11 +316,12 @@ Security hardening: The auth endpoint uses timing-safe comparison and rate limit
 - MFA enforcement
 - Application access policies
 - Audit logging
-- Forward auth middleware for Traefik (configured in `docker-compose.dev.yml` for n8n)
+- Forward auth middleware for Traefik (configured for n8n and Paperless-ngx)
 
 **Integration Points:**
 ```
-User → Authentik (SSO) → JWT Token → n8n
+User → Authentik (SSO) → JWT Token → n8n (forward auth)
+                                   → Paperless-ngx (forward auth)
                                    → Grafana (OAuth)
                                    → Console (OAuth)
                                    → Custom Apps
@@ -364,12 +367,14 @@ The project uses Docker Compose file merging for environment-specific configurat
 docker compose -f docker-compose.yml -f docker-compose.dev.yml \
                -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
                -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
+               -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
                up -d
 
 # Production (pinned versions, TLS, all modules)
 docker compose -f docker-compose.yml -f docker-compose.prod.yml \
                -f modules/console/docker-compose.yml \
                -f modules/admin/docker-compose.yml \
+               -f modules/paperless/docker-compose.yml \
                up -d
 
 # With observability
@@ -382,6 +387,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile observ
 |--------|----------|---------|
 | `admin` | `modules/admin/` | AI-administered system updates via MCP server + HTTP API + Slack approval API |
 | `console` | `modules/console/` | Client-facing operations hub with AI chat agent (Next.js 15, Vercel AI SDK v6, Auth.js, Drizzle ORM) |
+| `paperless` | `modules/paperless/` | Document management with OCR and full-text search (Paperless-ngx). 15 AI tools via Documents Operator sub-agent |
 
 ### Adding New Modules
 

@@ -9,14 +9,17 @@ import {
   Bot,
   Settings,
   LogOut,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OperatorOneMark } from "@/components/brand/operator-one-mark";
 
+const PAPERLESS_URL = process.env.NEXT_PUBLIC_PAPERLESS_URL || "http://docs.localhost";
+
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/requests", label: "Requests", icon: Send },
-  { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  { href: PAPERLESS_URL, label: "Documents", icon: FileText, external: true },
   { href: "/dashboard/operators", label: "Operators", icon: Bot },
   { href: "/dashboard/admin", label: "Admin", icon: Settings },
 ];
@@ -40,19 +43,38 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 p-3">
         {navItems.map((item) => {
           const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            !item.external &&
+            (pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href)));
+
+          const className = cn(
+            "flex items-center gap-3 px-3 py-2 text-xs uppercase tracking-wider transition-all duration-150",
+            isActive
+              ? "border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan shadow-[var(--shadow-glow-cyan-sm)]"
+              : "border border-transparent text-text-secondary hover:border-grid-border hover:text-text-primary"
+          );
+
+          if (item.external) {
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={className}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+                <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
+              </a>
+            );
+          }
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 text-xs uppercase tracking-wider transition-all duration-150",
-                isActive
-                  ? "border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan shadow-[var(--shadow-glow-cyan-sm)]"
-                  : "border border-transparent text-text-secondary hover:border-grid-border hover:text-text-primary"
-              )}
+              className={className}
             >
               <item.icon className="h-4 w-4" />
               {item.label}

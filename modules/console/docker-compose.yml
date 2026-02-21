@@ -32,6 +32,7 @@ services:
       - PAPERLESS_API_URL=${PAPERLESS_API_URL:-http://op1-paperless:8000/api}
       - PAPERLESS_API_TOKEN=${PAPERLESS_API_TOKEN}
       - PAPERLESS_URL=https://docs.${DOMAIN}
+      - NEXT_PUBLIC_PAPERLESS_URL=https://docs.${DOMAIN}
       # Setup wizard
       - SETUP_ENV_PATH=/opt/op1/.env
       - AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}
