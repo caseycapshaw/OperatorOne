@@ -5,6 +5,7 @@ import {
   requests,
   tickets,
   requestComments,
+  ticketComments,
   activityLog,
 } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -71,14 +72,24 @@ Recent activity: ${recentActivity.map((a) => a.title).join("; ")}`;
       maxOutputTokens: 200,
     });
 
-    // Add the triage comment
-    await db.insert(requestComments).values({
-      requestId: entityId,
-      clientId: null,
-      authorName: "AI Assistant",
-      body: text,
-      isInternal: false,
-    });
+    // Add the triage comment to the correct table
+    if (entityType === "request") {
+      await db.insert(requestComments).values({
+        requestId: entityId,
+        clientId: null,
+        authorName: "AI Assistant",
+        body: text,
+        isInternal: false,
+      });
+    } else {
+      await db.insert(ticketComments).values({
+        ticketId: entityId,
+        clientId: null,
+        authorName: "AI Assistant",
+        body: text,
+        isInternal: false,
+      });
+    }
 
     // Log the triage action
     await db.insert(activityLog).values({

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { organizations, clients } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAuth, getCurrentOrgId } from "@/lib/session";
+import { getChatSessionContext } from "@/lib/ai/session-context";
+import { hasMinRole } from "@/lib/roles";
 
 export async function GET() {
   try {
@@ -35,13 +37,16 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  try {
-    const client = await requireAuth();
-    const orgId = await getCurrentOrgId();
-    if (!orgId) {
-      return NextResponse.json({ error: "No organization" }, { status: 404 });
-    }
+  const ctx = await getChatSessionContext();
+  if (!ctx) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  if (!hasMinRole(ctx.role, "admin")) {
+    return NextResponse.json({ error: "Admin role required" }, { status: 403 });
+  }
+
+  try {
     const body = await request.json();
     const { orgName, orgDomain, operatorName, operatorEmail } = body as {
       orgName?: string;
@@ -66,7 +71,7 @@ export async function PATCH(request: Request) {
       await db
         .update(organizations)
         .set(updates)
-        .where(eq(organizations.id, orgId));
+        .where(eq(organizations.id, ctx.orgId));
     }
 
     // Update client (operator) record
@@ -77,11 +82,11 @@ export async function PATCH(request: Request) {
       await db
         .update(clients)
         .set(clientUpdates)
-        .where(eq(clients.id, client.id));
+        .where(eq(clients.id, ctx.clientId));
     }
 
     return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Failed to update organization" }, { status: 500 });
   }
 }

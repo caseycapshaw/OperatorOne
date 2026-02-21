@@ -11,12 +11,12 @@ services:
     volumes:
       - ../../.env:/opt/op1/.env
     environment:
-      - DATABASE_URL=postgresql://portal:${POSTGRES_PORTAL_PASSWORD}@postgres:5432/portal
-      - AUTH_SECRET=${PORTAL_AUTH_SECRET}
+      - DATABASE_URL=postgresql://console:${POSTGRES_CONSOLE_PASSWORD}@postgres:5432/console
+      - AUTH_SECRET=${CONSOLE_AUTH_SECRET}
       - AUTH_TRUST_HOST=true
       - AUTH_URL=https://console.${DOMAIN}
-      - AUTH_AUTHENTIK_ID=${PORTAL_OAUTH_CLIENT_ID}
-      - AUTH_AUTHENTIK_SECRET=${PORTAL_OAUTH_CLIENT_SECRET}
+      - AUTH_AUTHENTIK_ID=${CONSOLE_OAUTH_CLIENT_ID}
+      - AUTH_AUTHENTIK_SECRET=${CONSOLE_OAUTH_CLIENT_SECRET}
       - AUTH_AUTHENTIK_ISSUER=https://auth.${DOMAIN}/application/o/console/
       # AI Agent
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}

@@ -4,18 +4,8 @@ import { db } from "@/lib/db";
 import { agents } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { ALL_TOOL_NAMES } from "@/lib/ai/agents/tool-registry";
+import { hasMinRole } from "@/lib/roles";
 import type { Role } from "@/lib/ai/agents/types";
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 0,
-  member: 1,
-  admin: 2,
-  owner: 3,
-};
-
-function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[minRole];
-}
 
 export async function GET(
   _req: Request,

@@ -214,6 +214,19 @@ export const tickets = pgTable("tickets", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const ticketComments = pgTable("ticket_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ticketId: uuid("ticket_id")
+    .notNull()
+    .references(() => tickets.id, { onDelete: "cascade" }),
+  clientId: uuid("client_id")
+    .references(() => clients.id, { onDelete: "set null" }),
+  authorName: varchar("author_name", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  isInternal: boolean("is_internal").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const documents = pgTable("documents", {
   id: uuid("id").defaultRandom().primaryKey(),
   organizationId: uuid("organization_id")
@@ -353,6 +366,7 @@ export type RequestComment = typeof requestComments.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type Milestone = typeof milestones.$inferSelect;
 export type Ticket = typeof tickets.$inferSelect;
+export type TicketComment = typeof ticketComments.$inferSelect;
 export type Document = typeof documents.$inferSelect;
 export type ActivityLogEntry = typeof activityLog.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;

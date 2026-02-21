@@ -284,7 +284,7 @@ User Message → Supervisor (Operator One)
 - Provider-agnostic `ModelFactory` pattern (`provider.ts`) decouples all agent code from any specific AI SDK provider. Consumers call `getModelFactory()` which returns a `(modelId: string) => LanguageModel` function. When OpenRouter is active, bare Claude model IDs are auto-prefixed with `anthropic/` so existing agent definitions, `AI_MODEL`, and `modelOverride` work unchanged.
 
 **Setup Wizard:**
-The console includes a first-boot setup wizard that detects missing OAuth configuration (`PORTAL_OAUTH_CLIENT_ID` empty) and redirects to `/setup`. The 5-step wizard authenticates via bootstrap password, captures organization identity (name, domain, operator name/email), auto-creates OAuth2 providers in Authentik using its REST API, collects optional service credentials (Anthropic, SMTP, Slack), writes everything to `.env`, and restarts affected containers via the admin MCP server's `POST /tools/restart-services` endpoint. Organization identity is stored in `setup_config.org_identity` and applied on the first user login (used to create the org record with proper name/slug/domain instead of defaults). After completion, the `setup_config` table is marked complete and the wizard returns 403 on all subsequent requests.
+The console includes a first-boot setup wizard that detects missing OAuth configuration (`CONSOLE_OAUTH_CLIENT_ID` empty) and redirects to `/setup`. The 5-step wizard authenticates via bootstrap password, captures organization identity (name, domain, operator name/email), auto-creates OAuth2 providers in Authentik using its REST API, collects optional service credentials (Anthropic, SMTP, Slack), writes everything to `.env`, and restarts affected containers via the admin MCP server's `POST /tools/restart-services` endpoint. Organization identity is stored in `setup_config.org_identity` and applied on the first user login (used to create the org record with proper name/slug/domain instead of defaults). After completion, the `setup_config` table is marked complete and the wizard returns 403 on all subsequent requests.
 
 Security hardening: The auth endpoint uses timing-safe comparison and rate limiting (5 attempts per 15-minute window). OAuth client secrets are stored server-side in the `setup_config.provider_credentials` column and cleared after `.env` is written — the browser only sees masked values. All POST routes require a CSRF header (`X-Setup-Request: 1`), `.env` values are sanitized against injection, and error messages are generic (full details logged server-side only). The wizard requires `AUTH_SECRET`, `AUTHENTIK_BOOTSTRAP_TOKEN`, and `DOMAIN` to be set before first boot.
 
@@ -583,8 +583,8 @@ integrated tools.
 
 ```bash
 # 1. Clone template
-git clone https://github.com/your-org/operatorone
-cd operatorone
+git clone https://github.com/caseycapshaw/OperatorOne.git
+cd OperatorOne
 
 # 2. Generate secrets
 ./scripts/generate-secrets.sh > .env

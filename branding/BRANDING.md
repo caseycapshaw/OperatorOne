@@ -43,7 +43,6 @@ The "One" carries triple meaning:
 | **Casual reference** | "Operator" |
 | **Written shorthand** | O·1 (with interpunct) or Op1 |
 | **Domain (primary)** | `operatorone.ai` |
-| **Domain (future)** | `operatorone.com` (acquirable from HugeDomains) |
 | **npm/package scope** | `@operatorone/admin`, `@operatorone/console` |
 | **Docker prefix** | `op1-traefik`, `op1-console`, `op1-postgres` |
 | **Networks** | `op1-frontend`, `op1-backend` |
@@ -322,38 +321,6 @@ Real-world usage patterns — how people would actually talk about it:
 - *"Op1 handles all the client portals."*
 
 ---
-
-## Domain Strategy
-
-| Priority | Domain | Purpose |
-|---|---|---|
-| **Launch** | `operatorone.ai` | Primary domain — check and register |
-| **Protect** | `operatorone.dev` | Redirect to `.ai`, developer audience |
-| **Future** | `operatorone.com` | Acquire from HugeDomains when budget allows |
-| **Shortlink** | `op1.ai` | If available — for CLI docs, quick links |
-
----
-
-## IP Clearance
-
-### Domain: operatorone.com
-- Registered since 2003, held by HugeDomains (domain broker)
-- **For sale.** Typically $2,000–$10,000.
-
-### Domain: operatorone.ai
-- No WHOIS data found. **Likely available.**
-
-### Prior Use: Operator One (Luxembourg)
-- Defunct VoIP/telecom company, closed ~2015-2016
-- No active business, no website, no ongoing trademark
-
-### Adjacent Names
-- **Operative.One** — ad management platform (different name, different market)
-- **Operator One / O1** — EU marketplace operator (different market, goes by "O1")
-
-### Trademark
-- No USPTO registration found for "OperatorOne" or "Operator One"
-- Recommend filing once name is finalized
 
 ---
 

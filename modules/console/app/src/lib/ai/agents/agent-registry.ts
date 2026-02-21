@@ -6,18 +6,8 @@ import { agents } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { SYSTEM_AGENTS } from "./predefined";
 import { createSubAgent } from "./agent-factory";
+import { hasMinRole } from "@/lib/roles";
 import type { AgentDefinition, AgentContext, Role } from "./types";
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 0,
-  member: 1,
-  admin: 2,
-  owner: 3,
-};
-
-function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[minRole];
-}
 
 function dbAgentToDefinition(row: typeof agents.$inferSelect): AgentDefinition {
   return {

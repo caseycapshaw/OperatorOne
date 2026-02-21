@@ -21,6 +21,19 @@ export async function POST(req: Request) {
     conversationId?: string;
   };
 
+  // Validate conversationId belongs to the authenticated user's org + client
+  if (conversationId) {
+    const [conv] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId))
+      .limit(1);
+
+    if (!conv || conv.organizationId !== ctx.orgId || conv.clientId !== ctx.clientId) {
+      return new Response("Forbidden", { status: 403 });
+    }
+  }
+
   const [availableAgents, supervisorDef] = await Promise.all([
     getAvailableAgents(ctx),
     getSupervisorDefinition(ctx),

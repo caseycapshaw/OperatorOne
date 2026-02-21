@@ -6,6 +6,7 @@ import {
   requests,
   requestComments,
   tickets,
+  ticketComments,
   activityLog,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -15,11 +16,15 @@ import { redirect } from "next/navigation";
 // ─── Triage Helper ──────────────────────────
 
 function triggerTriage(entityType: "request" | "ticket", entityId: string, orgId: string) {
-  // Non-blocking fetch to the triage endpoint
+  // Non-blocking fetch to the triage endpoint (internal service-to-service call)
   const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (process.env.INTERNAL_API_TOKEN) {
+    headers["x-internal-token"] = process.env.INTERNAL_API_TOKEN;
+  }
   fetch(`${baseUrl}/api/agent/triage`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ entityType, entityId, orgId }),
   }).catch((err) => {
     console.error("Failed to trigger triage:", err);
@@ -181,9 +186,8 @@ export async function addTicketComment(formData: FormData) {
 
   if (!ticket) throw new Error("Ticket not found");
 
-  // Tickets reuse request_comments table with ticketId in metadata
-  await db.insert(requestComments).values({
-    requestId: ticketId,
+  await db.insert(ticketComments).values({
+    ticketId,
     clientId: client.id,
     authorName: client.name,
     body: body.trim(),

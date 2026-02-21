@@ -3,18 +3,8 @@ import { consoleReadTools } from "../tools/console-read-tools";
 import { consoleWriteTools } from "../tools/console-write-tools";
 import { n8nTools } from "../tools/n8n-tools";
 import { adminTools } from "../tools/admin-tools";
+import { hasMinRole } from "@/lib/roles";
 import type { AgentContext, Role } from "./types";
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 0,
-  member: 1,
-  admin: 2,
-  owner: 3,
-};
-
-function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[minRole];
-}
 
 export interface ToolCatalogEntry {
   name: string;

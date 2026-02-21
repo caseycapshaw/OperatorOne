@@ -396,8 +396,8 @@ The Console uses OAuth2/OIDC (same pattern as Grafana). It handles its own auth 
 ### 10b. Update `.env`
 
 ```bash
-PORTAL_OAUTH_CLIENT_ID=<client-id>
-PORTAL_OAUTH_CLIENT_SECRET=<client-secret>
+CONSOLE_OAUTH_CLIENT_ID=<client-id>
+CONSOLE_OAUTH_CLIENT_SECRET=<client-secret>
 ```
 
 Then recreate the console container (restart won't re-read `.env`):

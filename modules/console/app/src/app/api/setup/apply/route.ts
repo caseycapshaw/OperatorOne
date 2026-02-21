@@ -71,8 +71,8 @@ export async function POST(request: Request) {
   try {
     // Build env updates from server-side credentials
     const envUpdates: Record<string, string> = {
-      PORTAL_OAUTH_CLIENT_ID: creds.console.clientId,
-      PORTAL_OAUTH_CLIENT_SECRET: creds.console.clientSecret,
+      CONSOLE_OAUTH_CLIENT_ID: creds.console.clientId,
+      CONSOLE_OAUTH_CLIENT_SECRET: creds.console.clientSecret,
       GRAFANA_OAUTH_CLIENT_ID: creds.grafana.clientId,
       GRAFANA_OAUTH_CLIENT_SECRET: creds.grafana.clientSecret,
     };

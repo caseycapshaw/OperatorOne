@@ -387,18 +387,6 @@ User Message → Supervisor (Operator One)
 
 ---
 
-## What's Not Done Yet (Priority Order)
-
-1. **Add AI API key** — Set `ANTHROPIC_API_KEY` (direct) or `OPENROUTER_API_KEY` + `AI_PROVIDER=openrouter` in .env to start the AI agent
-2. **Generate N8N_API_KEY** — n8n Settings → API → Generate key, add to .env for workflow tools
-3. **Slack integration** — Create Slack app, set SLACK_WEBHOOK_URL + SLACK_SIGNING_SECRET for approval flow
-4. **Deploy to VPS** — Point domain, configure prod .env, run prod compose
-5. **n8n workflows** — No business workflows exist yet (only system update manager)
-6. **Additional MCP servers** — config/mcp/mcp-config.json is an architecture spec only; filesystem, postgres, slack, google-drive, email servers are not deployed
-7. **Observability** — Loki/Promtail/Grafana available but behind `observability` profile, not enabled by default
-
----
-
 ## File Map (Quick Reference)
 
 | What | Where |
@@ -454,21 +442,9 @@ User Message → Supervisor (Operator One)
 
 ---
 
-## Git & GitHub
-
-| Setting | Value |
-|---------|-------|
-| Repo | `caseycapshaw/OperatorOne` (private) |
-| Remote | `git@github.com-caseycapshaw:caseycapshaw/OperatorOne.git` |
-| Branch | `main` |
-| User | Casey Capshaw / casey@caseycapshaw.com |
-| Signing | SSH via 1Password (`op-ssh-sign`), key `ssh-ed25519 AAAAC3...07Xr4` |
-
-The `github.com-caseycapshaw` SSH host alias is defined in `~/.ssh/config` and routes through 1Password's SSH agent with the correct key. The `gh` CLI authenticates as `caseycapshaw` via OAuth token.
+## Git & Gitignore
 
 **Gitignored sensitive files:** `.env`, `.mcp.json`, `NEXT_STEPS.md`, `backups/`, `logs/`
-
-**Legacy naming note:** Some env vars still use `PORTAL_` prefix (e.g., `PORTAL_AUTH_SECRET`, `POSTGRES_PORTAL_PASSWORD`). These are functional in docker-compose and setup code. Renaming to `CONSOLE_*` is a recommended follow-up.
 
 ---
 

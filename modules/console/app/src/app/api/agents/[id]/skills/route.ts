@@ -3,18 +3,7 @@ import { getChatSessionContext } from "@/lib/ai/session-context";
 import { db } from "@/lib/db";
 import { agents, agentSkills } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
-import type { Role } from "@/lib/ai/agents/types";
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 0,
-  member: 1,
-  admin: 2,
-  owner: 3,
-};
-
-function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[minRole];
-}
+import { hasMinRole } from "@/lib/roles";
 
 export async function GET(
   _req: Request,

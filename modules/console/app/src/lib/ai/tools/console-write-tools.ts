@@ -5,23 +5,12 @@ import {
   requests,
   tickets,
   requestComments,
+  ticketComments,
   activityLog,
-  type OrganizationMember,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-
-type Role = NonNullable<OrganizationMember["role"]>;
-
-const ROLE_HIERARCHY: Record<Role, number> = {
-  viewer: 0,
-  member: 1,
-  admin: 2,
-  owner: 3,
-};
-
-function hasMinRole(userRole: Role, minRole: Role): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[minRole];
-}
+import { hasMinRole } from "@/lib/roles";
+import type { Role } from "@/lib/ai/agents/types";
 
 export function consoleWriteTools(orgId: string, clientId: string, role: Role) {
   return {
@@ -132,16 +121,27 @@ export function consoleWriteTools(orgId: string, clientId: string, role: Role) {
           if (!ticket) return { error: "Ticket not found" };
         }
 
-        const [comment] = await db
-          .insert(requestComments)
-          .values({
-            requestId: entityId,
-            clientId,
-            authorName: "AI Assistant",
-            body,
-            isInternal,
-          })
-          .returning();
+        const [comment] = entityType === "request"
+          ? await db
+              .insert(requestComments)
+              .values({
+                requestId: entityId,
+                clientId,
+                authorName: "AI Assistant",
+                body,
+                isInternal,
+              })
+              .returning()
+          : await db
+              .insert(ticketComments)
+              .values({
+                ticketId: entityId,
+                clientId,
+                authorName: "AI Assistant",
+                body,
+                isInternal,
+              })
+              .returning();
 
         await db.insert(activityLog).values({
           organizationId: orgId,

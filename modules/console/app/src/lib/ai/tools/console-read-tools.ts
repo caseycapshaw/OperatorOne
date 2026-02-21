@@ -7,6 +7,7 @@ import {
   projects,
   milestones,
   tickets,
+  ticketComments,
   documents,
   activityLog,
 } from "@/db/schema";
@@ -187,9 +188,9 @@ export function consoleReadTools(orgId: string) {
 
         const comments = await db
           .select()
-          .from(requestComments)
-          .where(eq(requestComments.requestId, ticketId))
-          .orderBy(requestComments.createdAt);
+          .from(ticketComments)
+          .where(eq(ticketComments.ticketId, ticketId))
+          .orderBy(ticketComments.createdAt);
 
         return {
           ...ticket,

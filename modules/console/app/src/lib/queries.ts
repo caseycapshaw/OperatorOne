@@ -7,6 +7,7 @@ import {
   projects,
   milestones,
   tickets,
+  ticketComments,
   documents,
   activityLog,
 } from "@/db/schema";
@@ -197,14 +198,14 @@ export async function getTicket(id: string) {
 
   const comments = await db
     .select()
-    .from(requestComments)
+    .from(ticketComments)
     .where(
       and(
-        eq(requestComments.requestId, id),
-        eq(requestComments.isInternal, false)
+        eq(ticketComments.ticketId, id),
+        eq(ticketComments.isInternal, false)
       )
     )
-    .orderBy(requestComments.createdAt);
+    .orderBy(ticketComments.createdAt);
 
   return { ...ticket, comments };
 }

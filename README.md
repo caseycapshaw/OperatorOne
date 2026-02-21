@@ -168,10 +168,10 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml \
   up -d
 
 # 5. Access services at *.localhost:
+#   - Console:    http://console.localhost
 #   - Automation: http://automation.localhost
-#   - Secrets:    http://secrets.localhost
 #   - SSO:        http://auth.localhost
-#   - Traefik:    http://localhost:8080 (dashboard)
+#   - Traefik:    http://traefik.localhost
 ```
 
 ### Production Deployment
@@ -193,7 +193,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml \
 docker compose logs -f
 
 # 5. Access services:
-#   - Secrets:    https://secrets.yourdomain.com
+#   - Console:    https://console.yourdomain.com
 #   - Automation: https://automation.yourdomain.com
 #   - SSO:        https://auth.yourdomain.com
 ```
@@ -381,7 +381,7 @@ docker compose logs -f n8n
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| `docker-compose.yml` | Base stack definition. Pins OpenBao; uses `:latest` for n8n. | Always included. |
+| `docker-compose.yml` | Base stack definition with pinned versions. | Always included. |
 | `docker-compose.prod.yml` | Production overrides: pinned versions, resource limits, tuned Postgres, structured access logs. | Production deployments. |
 | `docker-compose.dev.yml` | Dev overrides: HTTP-only (no TLS), exposed Traefik dashboard, debug logging, Authentik forward auth on n8n. | Local development. |
 | `modules/console/docker-compose.yml` | Console module (Next.js dashboard + AI agent). | Always included. |

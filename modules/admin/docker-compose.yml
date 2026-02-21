@@ -13,6 +13,9 @@ services:
       dockerfile: Dockerfile
     container_name: op1-admin-mcp
     restart: unless-stopped
+    # Grant Docker socket access to non-root user (match host docker GID)
+    group_add:
+      - "${DOCKER_GID:-999}"
     environment:
       - PROJECT_DIR=/opt/op1
       - LOG_DIR=/var/log/op1-admin

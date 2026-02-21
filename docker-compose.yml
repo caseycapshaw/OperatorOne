@@ -91,7 +91,7 @@ services:
   # WORKFLOW ORCHESTRATION
   # ===========================================
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.72.1
     container_name: op1-n8n
     restart: unless-stopped
     environment:
@@ -214,11 +214,11 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_ROOT_PASSWORD}
-      - POSTGRES_MULTIPLE_DATABASES=openbao,n8n,authentik,portal
+      - POSTGRES_MULTIPLE_DATABASES=openbao,n8n,authentik,console
       - POSTGRES_OPENBAO_PASSWORD=${POSTGRES_OPENBAO_PASSWORD}
       - POSTGRES_N8N_PASSWORD=${POSTGRES_N8N_PASSWORD}
       - POSTGRES_AUTHENTIK_PASSWORD=${POSTGRES_AUTHENTIK_PASSWORD}
-      - POSTGRES_PORTAL_PASSWORD=${POSTGRES_PORTAL_PASSWORD}
+      - POSTGRES_CONSOLE_PASSWORD=${POSTGRES_CONSOLE_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./scripts/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro

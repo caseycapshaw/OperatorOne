@@ -14,13 +14,18 @@ RUN npm install --production
 # Copy source
 COPY src/ ./src/
 
-# Create logs directory
-RUN mkdir -p /var/log/op1-admin
+# Create non-root user and logs directory
+RUN addgroup -S op1admin && adduser -S op1admin -G op1admin \
+    && mkdir -p /var/log/op1-admin \
+    && chown -R op1admin:op1admin /var/log/op1-admin /app
 
 # Expose HTTP API port for approval callbacks
 EXPOSE 3000
 
-# Run as non-root (but needs docker group access)
-# In production, configure docker socket permissions appropriately
+# Run as non-root user
+# Docker socket access requires adding the host's docker GID at runtime:
+#   docker run --group-add $(stat -c '%g' /var/run/docker.sock) ...
+# Or in compose: group_add: ["${DOCKER_GID:-999}"]
+USER op1admin
 
 CMD ["node", "src/index.js"]
