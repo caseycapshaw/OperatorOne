@@ -222,7 +222,7 @@ The default model is configurable per-org via the admin page dropdown. Models ar
 
 | Priority | Source | Set By |
 |----------|--------|--------|
-| 1 | Per-agent `modelOverride` | Agent editor UI / agents table |
+| 1 | Per-agent `modelOverride` | Agent editor dropdown / agents table |
 | 2 | `organizations.ai_model` | Admin page dropdown |
 | 3 | `AI_MODEL` env var | `.env` / Docker Compose |
 | 4 | `DEFAULT_MODEL_ID` | Hardcoded (`claude-sonnet-4-5-20250929`) |
@@ -315,6 +315,7 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/n8n-client.ts` — n8n REST API client
 - `modules/console/app/src/lib/ai/admin-client.ts` — Admin MCP HTTP API client
 - `modules/console/app/src/lib/ai/triage.ts` — Proactive triage logic (generateText, non-streaming)
+- `modules/console/app/src/components/agents/agent-editor.tsx` — Agent editor modal (general/skills/tools tabs, model override dropdown)
 - `modules/console/app/src/app/api/chat/route.ts` — Streaming chat (streamText + toUIMessageStreamResponse)
 - `modules/console/app/src/app/api/chat/conversations/route.ts` — List/create conversations
 - `modules/console/app/src/app/api/chat/conversations/[id]/route.ts` — Get/delete conversation
@@ -499,6 +500,7 @@ User Message → Supervisor (Operator One)
 | AI triage logic | `modules/console/app/src/lib/ai/triage.ts` |
 | Chat API route | `modules/console/app/src/app/api/chat/route.ts` |
 | Chat UI components | `modules/console/app/src/components/chat/` |
+| Agent editor UI | `modules/console/app/src/components/agents/agent-editor.tsx` |
 | Setup wizard | `modules/console/app/src/components/setup/SetupWizard.tsx` |
 | Setup utilities | `modules/console/app/src/lib/setup.ts` |
 | Setup apply API | `modules/console/app/src/app/api/setup/apply/route.ts` |

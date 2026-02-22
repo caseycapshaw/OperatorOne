@@ -109,6 +109,13 @@ export function AgentEditor({ agent, onClose }: AgentEditorProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Model dropdown state
+  const [availableModels, setAvailableModels] = useState<
+    { id: string; name: string; shortName: string; provider?: string; contextLength?: number }[]
+  >([]);
+  const [modelProvider, setModelProvider] = useState<"anthropic" | "openrouter">("anthropic");
+  const [modelsLoading, setModelsLoading] = useState(false);
+
   // Skills UI state
   const [editingSkill, setEditingSkill] = useState<string | null>(null); // skill id or "new"
   const [skillsLoading, setSkillsLoading] = useState(false);
@@ -136,6 +143,22 @@ export function AgentEditor({ agent, onClose }: AgentEditorProps) {
       .then(setTools)
       .catch(() => {});
   }, []);
+
+  const loadModels = useCallback((refresh = false) => {
+    setModelsLoading(true);
+    fetch(`/api/admin/models${refresh ? "?refresh=true" : ""}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setAvailableModels(data.models ?? []);
+        setModelProvider(data.provider ?? "anthropic");
+      })
+      .catch(() => {})
+      .finally(() => setModelsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    loadModels();
+  }, [loadModels]);
 
   const loadSkills = useCallback(() => {
     if (!isDbRecord || !agent?.id) return;
@@ -598,16 +621,72 @@ export function AgentEditor({ agent, onClose }: AgentEditorProps) {
 
               {/* Model override */}
               <div>
-                <label className="mb-1 block text-[10px] uppercase tracking-wider text-text-muted">
-                  Model Override (optional)
-                </label>
-                <input
-                  type="text"
-                  value={form.modelOverride}
-                  onChange={(e) => updateField("modelOverride", e.target.value)}
-                  className="w-full border border-grid-border bg-grid-dark px-3 py-1.5 text-sm text-text-primary outline-none focus:border-neon-cyan/50"
-                  placeholder="e.g. claude-haiku-4-5-20251001"
-                />
+                <div className="mb-1 flex items-center gap-2">
+                  <label className="block text-[10px] uppercase tracking-wider text-text-muted">
+                    Model Override (optional)
+                  </label>
+                  {!modelsLoading && (
+                    <button
+                      type="button"
+                      onClick={() => loadModels(true)}
+                      className="text-[10px] text-text-muted/50 transition-colors hover:text-neon-cyan"
+                    >
+                      Refresh
+                    </button>
+                  )}
+                </div>
+                {modelsLoading ? (
+                  <div className="w-full border border-grid-border bg-grid-dark px-3 py-1.5 text-sm text-text-muted/50">
+                    Loading models...
+                  </div>
+                ) : (
+                  <select
+                    value={form.modelOverride}
+                    onChange={(e) => updateField("modelOverride", e.target.value)}
+                    className="w-full border border-grid-border bg-grid-dark px-3 py-1.5 text-sm text-text-primary outline-none focus:border-neon-cyan/50"
+                  >
+                    <option value="">Use org default</option>
+                    {modelProvider === "openrouter" ? (
+                      Object.entries(
+                        availableModels.reduce<Record<string, typeof availableModels>>((acc, m) => {
+                          const group = m.provider || "other";
+                          if (!acc[group]) acc[group] = [];
+                          acc[group].push(m);
+                          return acc;
+                        }, {})
+                      ).map(([provider, models]) => (
+                        <optgroup
+                          key={provider}
+                          label={
+                            {
+                              anthropic: "Anthropic",
+                              openai: "OpenAI",
+                              google: "Google",
+                              moonshotai: "MoonshotAI",
+                              "meta-llama": "Meta",
+                              mistralai: "Mistral",
+                              deepseek: "DeepSeek",
+                              cohere: "Cohere",
+                            }[provider] || provider
+                          }
+                        >
+                          {models.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.shortName}
+                              {m.contextLength ? ` (${Math.round(m.contextLength / 1000)}k)` : ""}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))
+                    ) : (
+                      availableModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                )}
               </div>
             </>
           )}
