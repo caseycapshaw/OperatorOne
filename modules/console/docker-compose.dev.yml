@@ -28,8 +28,12 @@ services:
       # Authorization URL is browser-facing (user's browser redirects here)
       - AUTH_AUTHENTIK_AUTH_URL=http://auth.localhost/application/o/authorize/
       # AI Agent
+      - AI_PROVIDER=${AI_PROVIDER:-anthropic}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - AI_MODEL=${AI_MODEL:-claude-sonnet-4-5-20250929}
+      # OpenBao secrets management
+      - OPENBAO_ADDR=http://openbao:8200
+      - OPENBAO_SERVICE_TOKEN=${OPENBAO_SERVICE_TOKEN}
       - N8N_API_URL=http://op1-n8n:5678/api/v1
       - N8N_API_KEY=${N8N_API_KEY}
       - ADMIN_MCP_URL=http://admin-mcp-server:3000

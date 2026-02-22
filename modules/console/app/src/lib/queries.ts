@@ -26,6 +26,27 @@ export async function getCurrentOrganization() {
   return org ?? null;
 }
 
+// ─── AI Provider ─────────────────────────────
+
+export async function getOrgAiProvider(orgId: string): Promise<string> {
+  const [org] = await db
+    .select({ aiProvider: organizations.aiProvider })
+    .from(organizations)
+    .where(eq(organizations.id, orgId))
+    .limit(1);
+  return org?.aiProvider ?? "auto";
+}
+
+export async function updateOrgAiProvider(
+  orgId: string,
+  provider: "auto" | "anthropic" | "openrouter",
+): Promise<void> {
+  await db
+    .update(organizations)
+    .set({ aiProvider: provider, updatedAt: new Date() })
+    .where(eq(organizations.id, orgId));
+}
+
 // ─── Dashboard ──────────────────────────────
 
 export async function getDashboardData() {

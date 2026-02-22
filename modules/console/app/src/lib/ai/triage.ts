@@ -64,7 +64,7 @@ ${entityType === "request" ? `Category: ${entity.category}` : ""}
 Recent activity: ${recentActivity.map((a) => a.title).join("; ")}`;
 
   try {
-    const provider = await getModelFactory();
+    const provider = await getModelFactory(orgId);
     const { text } = await generateText({
       model: provider(model),
       system: systemPrompt,

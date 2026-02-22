@@ -19,6 +19,7 @@ services:
       - AUTH_AUTHENTIK_SECRET=${CONSOLE_OAUTH_CLIENT_SECRET}
       - AUTH_AUTHENTIK_ISSUER=https://auth.${DOMAIN}/application/o/console/
       # AI Agent
+      - AI_PROVIDER=${AI_PROVIDER:-anthropic}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       # OpenBao secrets management
       - OPENBAO_ADDR=http://openbao:8200

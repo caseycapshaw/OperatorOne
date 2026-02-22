@@ -19,6 +19,8 @@ interface SecretsResponse {
   openrouterApiKey: KeyStatus;
   paperlessApiToken: KeyStatus;
   aiProvider: "anthropic" | "openrouter";
+  aiProviderPreference: "auto" | "anthropic" | "openrouter";
+  aiProviderReason: string;
   openbaoAvailable: boolean;
 }
 
@@ -170,6 +172,7 @@ function ComingSoonContent({ name }: { name: string }) {
 export function AdminIntegrations() {
   const [secrets, setSecrets] = useState<SecretsResponse | null>(null);
   const [activeModal, setActiveModal] = useState<ModalId>(null);
+  const [providerSaving, setProviderSaving] = useState(false);
 
   function fetchSecrets() {
     fetch("/api/admin/secrets")
@@ -182,25 +185,87 @@ export function AdminIntegrations() {
     fetchSecrets();
   }, []);
 
+  async function handleProviderChange(value: "auto" | "anthropic" | "openrouter") {
+    setProviderSaving(true);
+    try {
+      const res = await fetch("/api/admin/secrets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aiProvider: value }),
+      });
+      if (res.ok) {
+        fetchSecrets();
+      }
+    } catch {
+      // Network error — silently fail, next fetchSecrets will re-sync
+    } finally {
+      setProviderSaving(false);
+    }
+  }
+
   const anthropicStatus = secrets?.anthropicApiKey;
   const openrouterStatus = secrets?.openrouterApiKey;
   const n8nStatus = secrets?.n8nApiKey;
   const paperlessStatus = secrets?.paperlessApiToken;
   const activeProvider = secrets?.aiProvider ?? "anthropic";
+  const preference = secrets?.aiProviderPreference ?? "auto";
+  const providerReason = secrets?.aiProviderReason ?? "";
 
   return (
     <>
       {/* ── Agents & LLMs ─────────────────────── */}
       <HudFrame title="Agents & LLMs">
-        {/* Active provider indicator */}
-        <div className="mb-3 flex items-center gap-2 text-xs text-text-muted">
-          <span>Active provider:</span>
-          <span className="font-medium uppercase tracking-wider text-neon-cyan">
-            {activeProvider === "openrouter" ? "OpenRouter" : "Anthropic"}
-          </span>
-          <span className="text-text-muted/40">
-            (set via AI_PROVIDER env var)
-          </span>
+        {/* Provider selector */}
+        <div className="mb-3 space-y-2">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <span>AI Provider:</span>
+            <div className="flex gap-1">
+              {(["auto", "anthropic", "openrouter"] as const).map((opt) => {
+                const isSelected = preference === opt;
+                const label = opt === "auto" ? "Auto" : opt === "anthropic" ? "Anthropic" : "OpenRouter";
+                const disabled =
+                  providerSaving ||
+                  (opt === "anthropic" && !anthropicStatus?.configured) ||
+                  (opt === "openrouter" && !openrouterStatus?.configured);
+                return (
+                  <button
+                    key={opt}
+                    onClick={() => handleProviderChange(opt)}
+                    disabled={disabled && !isSelected}
+                    className={`px-3 py-1 text-[10px] font-medium uppercase tracking-widest transition-all ${
+                      isSelected
+                        ? "border border-neon-cyan bg-neon-cyan/15 text-neon-cyan"
+                        : disabled
+                          ? "border border-grid-border/50 text-text-muted/30 cursor-not-allowed"
+                          : "border border-grid-border text-text-muted hover:border-neon-cyan/40 hover:text-text-primary"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            {providerSaving && (
+              <span className="text-[10px] text-text-muted/50">Saving...</span>
+            )}
+          </div>
+          <div className="text-[10px] text-text-muted/50">
+            {preference === "auto" ? (
+              providerReason === "auto-both" ? (
+                <>Using <span className="text-neon-cyan">Anthropic</span> (both keys configured, auto prefers Anthropic)</>
+              ) : providerReason === "auto-only-key" ? (
+                <>Using <span className="text-neon-cyan">{activeProvider === "openrouter" ? "OpenRouter" : "Anthropic"}</span> (only available key)</>
+              ) : (
+                <>Auto-detect: configure at least one provider key</>
+              )
+            ) : providerReason === "fallback-other" ? (
+              <span className="text-yellow-400">
+                Preferred provider key missing — using {activeProvider === "openrouter" ? "OpenRouter" : "Anthropic"} as fallback
+              </span>
+            ) : (
+              <>Using <span className="text-neon-cyan">{activeProvider === "openrouter" ? "OpenRouter" : "Anthropic"}</span></>
+            )}
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <IntegrationCard
@@ -368,13 +433,10 @@ export function AdminIntegrations() {
                 openrouter.ai/keys
               </a>
             </p>
-            <div className="space-y-1 border-t border-grid-border pt-2">
-              <p className="text-[10px] uppercase tracking-widest text-text-muted/60">
-                To activate
-              </p>
+            <div className="border-t border-grid-border pt-2">
               <p className="text-xs text-text-muted">
-                Set <span className="font-mono text-text-primary">AI_PROVIDER=openrouter</span> in
-                your .env file and restart the console container.
+                After saving your key, select <span className="font-medium text-text-primary">OpenRouter</span> in
+                the provider toggle above to activate.
               </p>
             </div>
           </div>

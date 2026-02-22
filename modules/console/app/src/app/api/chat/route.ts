@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const provider = await getModelFactory();
+  const provider = await getModelFactory(ctx.orgId);
 
   const body = await req.json();
   const { messages: chatMessages, conversationId } = body as {

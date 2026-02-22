@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { readSecret, writeSecret, checkHealth } from "@/lib/openbao";
-import { getActiveProvider } from "@/lib/ai/provider";
+import { resolveProvider } from "@/lib/ai/provider";
 import { getChatSessionContext } from "@/lib/ai/session-context";
 import { hasMinRole } from "@/lib/roles";
+import { getOrgAiProvider, updateOrgAiProvider } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -86,12 +87,23 @@ export async function GET() {
     paperlessSource = "env";
   }
 
+  // Resolve the active AI provider for this org
+  const orgPreference = await getOrgAiProvider(ctx.orgId);
+  let resolved: { provider: string; reason: string } = { provider: "anthropic", reason: "env" };
+  try {
+    resolved = await resolveProvider(ctx.orgId);
+  } catch {
+    // No keys configured — report the preference but no active provider
+  }
+
   return NextResponse.json({
     anthropicApiKey: resolveKeyStatus(anthropicKey, anthropicSource),
     n8nApiKey: resolveKeyStatus(n8nKey, n8nSource),
     openrouterApiKey: resolveKeyStatus(openrouterKey, openrouterSource),
     paperlessApiToken: resolveKeyStatus(paperlessToken, paperlessSource),
-    aiProvider: getActiveProvider(),
+    aiProvider: resolved.provider as "anthropic" | "openrouter",
+    aiProviderPreference: orgPreference,
+    aiProviderReason: resolved.reason,
     openbaoAvailable,
   });
 }
@@ -112,6 +124,7 @@ export async function PATCH(request: Request) {
       n8nApiKey?: string;
       openrouterApiKey?: string;
       paperlessApiToken?: string;
+      aiProvider?: string;
     };
 
     if (body.anthropicApiKey !== undefined) {
@@ -232,6 +245,21 @@ export async function PATCH(request: Request) {
         { error: "OpenBao is not available. Cannot save secrets." },
         { status: 503 },
       );
+    }
+
+    if (body.aiProvider !== undefined) {
+      const valid = ["auto", "anthropic", "openrouter"];
+      if (!valid.includes(body.aiProvider)) {
+        return NextResponse.json(
+          { error: `Invalid AI provider. Must be one of: ${valid.join(", ")}` },
+          { status: 400 },
+        );
+      }
+      await updateOrgAiProvider(
+        ctx.orgId,
+        body.aiProvider as "auto" | "anthropic" | "openrouter",
+      );
+      return NextResponse.json({ success: true, aiProvider: body.aiProvider });
     }
 
     return NextResponse.json(
