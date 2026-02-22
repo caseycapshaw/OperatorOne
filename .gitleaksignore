@@ -1,0 +1,6 @@
+# Gitleaks per-finding suppressions
+# Format: <fingerprint> (one per line)
+# Get fingerprints from: gitleaks detect --source=. --verbose --report-format=json
+#
+# Only add entries here for verified false positives that can't be handled
+# by the global allowlist in .gitleaks.toml.

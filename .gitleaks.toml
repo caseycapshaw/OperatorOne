@@ -1,0 +1,102 @@
+# Gitleaks configuration for OperatorOne
+# Extends the ~90 built-in rules with project-specific patterns.
+# Docs: https://github.com/gitleaks/gitleaks#configuration
+
+title = "OperatorOne secret scanning"
+
+# ─── Custom rules ──────────────────────────────────────────────
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key"
+regex = '''(?i)sk-ant-[a-zA-Z0-9_\-]{20,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "openrouter-api-key"
+description = "OpenRouter API key"
+regex = '''(?i)sk-or-[a-zA-Z0-9_\-]{20,}'''
+keywords = ["sk-or-"]
+
+[[rules]]
+id = "openbao-token"
+description = "OpenBao / Vault service token"
+regex = '''(?i)(hvs\.[a-zA-Z0-9_\-]{20,}|s\.[a-zA-Z0-9]{24,})'''
+keywords = ["hvs.", "s."]
+
+[[rules]]
+id = "op1-setup-code"
+description = "OperatorOne setup wizard code"
+regex = '''SETUP_CODE\s*=\s*op1-[a-zA-Z0-9]{6,}'''
+keywords = ["SETUP_CODE"]
+
+[[rules]]
+id = "slack-webhook-url"
+description = "Slack incoming webhook URL"
+regex = '''https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+'''
+keywords = ["hooks.slack.com"]
+
+[[rules]]
+id = "op1-env-secret"
+description = "Populated secret in .env-style assignment"
+regex = '''(?im)^[\s\-]*(?:export\s+)?(POSTGRES_ROOT_PASSWORD|POSTGRES_OPENBAO_PASSWORD|POSTGRES_N8N_PASSWORD|POSTGRES_AUTHENTIK_PASSWORD|POSTGRES_CONSOLE_PASSWORD|POSTGRES_PAPERLESS_PASSWORD|OPENBAO_UNSEAL_KEY|OPENBAO_ROOT_TOKEN|OPENBAO_SERVICE_TOKEN|N8N_ENCRYPTION_KEY|N8N_JWT_SECRET|AUTHENTIK_SECRET_KEY|AUTHENTIK_BOOTSTRAP_PASSWORD|AUTHENTIK_BOOTSTRAP_TOKEN|GRAFANA_ADMIN_PASSWORD|GRAFANA_OAUTH_CLIENT_SECRET|CONSOLE_AUTH_SECRET|CONSOLE_OAUTH_CLIENT_SECRET|INTERNAL_API_TOKEN|ANTHROPIC_API_KEY|OPENROUTER_API_KEY|N8N_API_KEY|PAPERLESS_SECRET_KEY|PAPERLESS_ADMIN_PASSWORD|PAPERLESS_API_TOKEN|APPROVAL_API_TOKEN|SMTP_PASSWORD|SLACK_SIGNING_SECRET|SLACK_WEBHOOK_URL)\s*=\s*[^\s$#"'][^\s]{7,}'''
+keywords = [
+  "POSTGRES_ROOT_PASSWORD",
+  "POSTGRES_OPENBAO_PASSWORD",
+  "POSTGRES_N8N_PASSWORD",
+  "POSTGRES_AUTHENTIK_PASSWORD",
+  "POSTGRES_CONSOLE_PASSWORD",
+  "POSTGRES_PAPERLESS_PASSWORD",
+  "OPENBAO_UNSEAL_KEY",
+  "OPENBAO_ROOT_TOKEN",
+  "OPENBAO_SERVICE_TOKEN",
+  "N8N_ENCRYPTION_KEY",
+  "N8N_JWT_SECRET",
+  "AUTHENTIK_SECRET_KEY",
+  "AUTHENTIK_BOOTSTRAP_PASSWORD",
+  "AUTHENTIK_BOOTSTRAP_TOKEN",
+  "GRAFANA_ADMIN_PASSWORD",
+  "GRAFANA_OAUTH_CLIENT_SECRET",
+  "CONSOLE_AUTH_SECRET",
+  "CONSOLE_OAUTH_CLIENT_SECRET",
+  "INTERNAL_API_TOKEN",
+  "ANTHROPIC_API_KEY",
+  "OPENROUTER_API_KEY",
+  "N8N_API_KEY",
+  "PAPERLESS_SECRET_KEY",
+  "PAPERLESS_ADMIN_PASSWORD",
+  "PAPERLESS_API_TOKEN",
+  "APPROVAL_API_TOKEN",
+  "SMTP_PASSWORD",
+  "SLACK_SIGNING_SECRET",
+  "SLACK_WEBHOOK_URL",
+]
+
+# ─── Global allowlist ──────────────────────────────────────────
+# Paths and patterns that legitimately reference secret formats.
+
+[allowlist]
+paths = [
+  '''.env\.example$''',
+  '''\.claude/CLAUDE\.md$''',
+  '''docs/.*\.md$''',
+  '''README\.md$''',
+  '''SECURITY\.md$''',
+  '''scripts/generate-secrets\.sh$''',
+  '''scripts/init-openbao\.sh$''',
+  '''.gitleaks\.toml$''',
+]
+regexTarget = "match"
+regexes = [
+  # Hardcoded dev-only bootstrap token (not a real secret)
+  '''dev-bootstrap-token''',
+  # Placeholder strings in UI components and docs (e.g. placeholder="sk-ant-...")
+  '''sk-ant-\.\.\.''',
+  '''sk-or-\.\.\.''',
+  # Code validation: startsWith("sk-ant-") / startsWith("sk-or-")
+  '''startsWith\(["']sk-ant-["']\)''',
+  '''startsWith\(["']sk-or-["']\)''',
+  # Error messages referencing expected prefix format
+  '''expected sk-ant-''',
+  '''expected sk-or-''',
+]
