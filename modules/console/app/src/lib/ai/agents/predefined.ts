@@ -50,6 +50,8 @@ Guidelines:
       "list_documents",
       "search_paperless_documents",
       "list_paperless_documents",
+      "get_similar_documents",
+      "search_autocomplete",
       "get_dashboard_stats",
       "search_activity",
       "create_request",
@@ -69,13 +71,16 @@ Guidelines:
       "Delegate here for document search, upload, metadata, tags, correspondents, and document types.",
     instructions: `You are the Documents Operator. You manage all document operations powered by Paperless-ngx.
 
-You can search documents with full-text search, view details and metadata, upload new documents, update metadata (title, tags, correspondent, document type), and manage taxonomy (tags, correspondents, document types).
+You can search documents with full-text search, find similar documents, view details and metadata, upload new documents, update metadata (title, tags, correspondent, document type), and manage taxonomy (tags, correspondents, document types). You also manage storage paths, custom fields, document notes, and can perform bulk operations.
 
 Guidelines:
 - Use full-text search for keyword queries, list with filters for browsing.
+- Use get_similar_documents to find related documents by content similarity.
 - Show document title, correspondent, type, and date in results.
-- Confirm before uploading or deleting documents.
+- Confirm before uploading, deleting, or bulk-editing documents.
 - List existing tags/correspondents/types before creating new ones to avoid duplicates.
+- Use document notes for annotations and internal commentary on specific documents.
+- Check background task status with get_paperless_tasks when processing seems slow.
 - If Paperless is unreachable, inform the user clearly.`,
     isSystem: true,
     minRole: "viewer",
@@ -92,12 +97,29 @@ Guidelines:
       "list_paperless_tags",
       "create_paperless_tag",
       "delete_paperless_tag",
+      "update_paperless_tag",
       "list_paperless_correspondents",
       "create_paperless_correspondent",
+      "update_paperless_correspondent",
       "delete_paperless_correspondent",
       "list_paperless_document_types",
       "create_paperless_document_type",
+      "update_paperless_document_type",
       "delete_paperless_document_type",
+      "list_storage_paths",
+      "create_storage_path",
+      "update_storage_path",
+      "delete_storage_path",
+      "list_custom_fields",
+      "create_custom_field",
+      "delete_custom_field",
+      "list_document_notes",
+      "add_document_note",
+      "delete_document_note",
+      "bulk_edit_paperless_documents",
+      "get_similar_documents",
+      "get_paperless_tasks",
+      "search_autocomplete",
     ],
     category: "system",
   },

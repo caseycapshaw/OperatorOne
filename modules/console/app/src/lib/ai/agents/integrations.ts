@@ -20,13 +20,31 @@ export const INTEGRATIONS: IntegrationDefinition[] = [
     ],
   },
   {
+    id: "paperless",
+    name: "Paperless-ngx Documents",
+    categories: [
+      "Paperless (Read)",
+      "Paperless (Write)",
+      "Paperless (Tags)",
+      "Paperless (Meta)",
+      "Paperless (Storage Paths)",
+      "Paperless (Custom Fields)",
+      "Paperless (Notes)",
+      "Paperless (Bulk & Discovery)",
+    ],
+  },
+  {
     id: "system-admin",
     name: "System Administration",
     categories: ["System Admin"],
   },
 ];
 
-export const ALWAYS_ON_CATEGORIES = ["Console (Read)", "Console (Write)"];
+export const ALWAYS_ON_CATEGORIES = [
+  "Console (Read)",
+  "Console (Write)",
+  "Paperless (Read)",
+];
 
 export function getEnabledCategories(enabledIds: string[]): Set<string> {
   const categories = new Set<string>(ALWAYS_ON_CATEGORIES);

@@ -104,15 +104,40 @@ const TOOL_CATALOG: ToolCatalogEntry[] = [
   // Paperless (Tags)
   { name: "list_paperless_tags", description: "List all Paperless tags", minRole: "viewer", category: "Paperless (Tags)" },
   { name: "create_paperless_tag", description: "Create a Paperless tag", minRole: "member", category: "Paperless (Tags)" },
+  { name: "update_paperless_tag", description: "Update/rename a Paperless tag", minRole: "member", category: "Paperless (Tags)" },
   { name: "delete_paperless_tag", description: "Delete a Paperless tag", minRole: "admin", category: "Paperless (Tags)" },
 
   // Paperless (Meta)
   { name: "list_paperless_correspondents", description: "List Paperless correspondents", minRole: "viewer", category: "Paperless (Meta)" },
   { name: "create_paperless_correspondent", description: "Create a Paperless correspondent", minRole: "member", category: "Paperless (Meta)" },
+  { name: "update_paperless_correspondent", description: "Update/rename a Paperless correspondent", minRole: "member", category: "Paperless (Meta)" },
   { name: "delete_paperless_correspondent", description: "Delete a Paperless correspondent", minRole: "admin", category: "Paperless (Meta)" },
   { name: "list_paperless_document_types", description: "List Paperless document types", minRole: "viewer", category: "Paperless (Meta)" },
   { name: "create_paperless_document_type", description: "Create a Paperless document type", minRole: "member", category: "Paperless (Meta)" },
+  { name: "update_paperless_document_type", description: "Update/rename a Paperless document type", minRole: "member", category: "Paperless (Meta)" },
   { name: "delete_paperless_document_type", description: "Delete a Paperless document type", minRole: "admin", category: "Paperless (Meta)" },
+
+  // Paperless (Storage Paths)
+  { name: "list_storage_paths", description: "List Paperless storage paths", minRole: "viewer", category: "Paperless (Storage Paths)" },
+  { name: "create_storage_path", description: "Create a Paperless storage path", minRole: "member", category: "Paperless (Storage Paths)" },
+  { name: "update_storage_path", description: "Update a Paperless storage path", minRole: "member", category: "Paperless (Storage Paths)" },
+  { name: "delete_storage_path", description: "Delete a Paperless storage path", minRole: "admin", category: "Paperless (Storage Paths)" },
+
+  // Paperless (Custom Fields)
+  { name: "list_custom_fields", description: "List Paperless custom fields", minRole: "viewer", category: "Paperless (Custom Fields)" },
+  { name: "create_custom_field", description: "Create a Paperless custom field", minRole: "admin", category: "Paperless (Custom Fields)" },
+  { name: "delete_custom_field", description: "Delete a Paperless custom field", minRole: "admin", category: "Paperless (Custom Fields)" },
+
+  // Paperless (Notes)
+  { name: "list_document_notes", description: "List notes on a Paperless document", minRole: "viewer", category: "Paperless (Notes)" },
+  { name: "add_document_note", description: "Add a note to a Paperless document", minRole: "member", category: "Paperless (Notes)" },
+  { name: "delete_document_note", description: "Delete a note from a Paperless document", minRole: "admin", category: "Paperless (Notes)" },
+
+  // Paperless (Bulk & Discovery)
+  { name: "bulk_edit_paperless_documents", description: "Bulk edit multiple Paperless documents", minRole: "admin", category: "Paperless (Bulk & Discovery)" },
+  { name: "get_similar_documents", description: "Find similar documents in Paperless", minRole: "viewer", category: "Paperless (Bulk & Discovery)" },
+  { name: "get_paperless_tasks", description: "Get Paperless background task status", minRole: "viewer", category: "Paperless (Bulk & Discovery)" },
+  { name: "search_autocomplete", description: "Get Paperless search autocomplete suggestions", minRole: "viewer", category: "Paperless (Bulk & Discovery)" },
 ];
 
 function buildAllTools(

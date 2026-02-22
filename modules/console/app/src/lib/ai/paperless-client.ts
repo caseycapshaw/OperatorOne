@@ -193,4 +193,140 @@ export const paperlessClient = {
   async deleteDocumentType(id: number) {
     return paperlessFetch(`/document_types/${enc(id)}/`, { method: "DELETE" });
   },
+
+  // ─── Taxonomy Updates ─────────────────────────────────
+
+  async updateTag(id: number, body: Record<string, unknown>) {
+    return paperlessFetch(`/tags/${enc(id)}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+
+  async updateCorrespondent(id: number, body: Record<string, unknown>) {
+    return paperlessFetch(`/correspondents/${enc(id)}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+
+  async updateDocumentType(id: number, body: Record<string, unknown>) {
+    return paperlessFetch(`/document_types/${enc(id)}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+
+  // ─── Storage Paths ────────────────────────────────────
+
+  async listStoragePaths() {
+    const data = await paperlessFetch("/storage_paths/");
+    if (data && "error" in data) return data;
+    return (data.results ?? data ?? []).map((p: Record<string, unknown>) => ({
+      id: p.id,
+      name: p.name,
+      path: p.path,
+      matching_algorithm: p.matching_algorithm,
+      document_count: p.document_count,
+    }));
+  },
+
+  async createStoragePath(name: string, path: string) {
+    return paperlessFetch("/storage_paths/", {
+      method: "POST",
+      body: JSON.stringify({ name, path }),
+    });
+  },
+
+  async updateStoragePath(id: number, body: Record<string, unknown>) {
+    return paperlessFetch(`/storage_paths/${enc(id)}/`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+
+  async deleteStoragePath(id: number) {
+    return paperlessFetch(`/storage_paths/${enc(id)}/`, { method: "DELETE" });
+  },
+
+  // ─── Custom Fields ────────────────────────────────────
+
+  async listCustomFields() {
+    const data = await paperlessFetch("/custom_fields/");
+    if (data && "error" in data) return data;
+    return (data.results ?? data ?? []).map((f: Record<string, unknown>) => ({
+      id: f.id,
+      name: f.name,
+      data_type: f.data_type,
+    }));
+  },
+
+  async createCustomField(name: string, dataType: string) {
+    return paperlessFetch("/custom_fields/", {
+      method: "POST",
+      body: JSON.stringify({ name, data_type: dataType }),
+    });
+  },
+
+  async deleteCustomField(id: number) {
+    return paperlessFetch(`/custom_fields/${enc(id)}/`, { method: "DELETE" });
+  },
+
+  // ─── Document Notes ───────────────────────────────────
+
+  async listDocumentNotes(docId: number) {
+    return paperlessFetch(`/documents/${enc(docId)}/notes/`);
+  },
+
+  async addDocumentNote(docId: number, note: string) {
+    return paperlessFetch(`/documents/${enc(docId)}/notes/`, {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    });
+  },
+
+  async deleteDocumentNote(docId: number, noteId: number) {
+    return paperlessFetch(`/documents/${enc(docId)}/notes/${enc(noteId)}/`, {
+      method: "DELETE",
+    });
+  },
+
+  // ─── Bulk & Discovery ─────────────────────────────────
+
+  async bulkEditDocuments(
+    documents: number[],
+    method: string,
+    parameters: Record<string, unknown>,
+  ) {
+    return paperlessFetch("/documents/bulk_edit/", {
+      method: "POST",
+      body: JSON.stringify({ documents, method, parameters }),
+    });
+  },
+
+  async getSimilarDocuments(docId: number, page?: number) {
+    const data = await paperlessFetch(
+      `/documents/${buildQuery({ more_like_id: docId, page })}`,
+    );
+    if (data && "error" in data) return data;
+    return {
+      count: data.count,
+      results: (data.results ?? []).map((d: Record<string, unknown>) => ({
+        id: d.id,
+        title: d.title,
+        correspondent: d.correspondent,
+        document_type: d.document_type,
+        tags: d.tags,
+        created: d.created,
+      })),
+    };
+  },
+
+  async getTasks() {
+    return paperlessFetch("/tasks/");
+  },
+
+  async searchAutocomplete(term: string) {
+    return paperlessFetch(`/search/autocomplete/${buildQuery({ term })}`);
+  },
 };
