@@ -13,6 +13,7 @@ export interface AgentDefinition {
   icon?: string | null;
   color?: string | null;
   modelOverride?: string | null;
+  modelRecommendation?: string | null;
   maxSteps: number;
   allowedTools: string[];
   toolSettings?: Record<string, Record<string, string>>;

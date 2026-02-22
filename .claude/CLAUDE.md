@@ -160,13 +160,13 @@ modules/<name>/
 - Shares PostgreSQL (`paperless` database) and Redis (key prefix `paperless:`)
 - SSO via Authentik forward auth (same pattern as n8n)
 - Console AI agent accesses via REST API with token auth
-- 15 AI tools in the Documents Operator sub-agent
+- 32 AI tools in the Documents Operator sub-agent
 - Console documents page reads from Paperless API
 - **Status: Running, integrated into standard dev stack**
 
 **Console** (`modules/console/`):
 - Next.js 15 (App Router) client-facing dashboard
-- **AI Operations Agent**: supervisor/sub-agent architecture with 54 role-gated tools
+- **AI Operations Agent**: supervisor/sub-agent architecture with 86 role-gated tools
 - Supervisor (Operator One) delegates to Console, Workflow, and System Admin operators
 - DB-backed agent definitions, skills, and custom tools for per-org customization
 - Auth.js v5 with Authentik OIDC provider
@@ -257,8 +257,8 @@ The AI system uses a **supervisor/sub-agent pattern** built on Vercel AI SDK's `
 ```
 User Message → Supervisor (Operator One)
                    │
-                   ├── delegate_to_console-manager → Console Operator (16 tools)
-                   ├── delegate_to_documents-manager → Documents Operator (15 tools)
+                   ├── delegate_to_console-manager → Console Operator (18 tools)
+                   ├── delegate_to_documents-manager → Documents Operator (32 tools)
                    ├── delegate_to_workflow-manager → Workflow Operator (37 tools, admin+)
                    ├── delegate_to_system-admin → System Admin Operator (3 tools, admin+)
                    └── delegate_to_<custom-slug> → Custom/Template Agents (configurable tools)
@@ -271,17 +271,24 @@ User Message → Supervisor (Operator One)
 4. When supervisor delegates, `agent-factory.ts` creates a sub-agent with resolved tools + loaded skills
 5. Sub-agent executes, returns result to supervisor, which relays to user
 
-**69 total tools** across 5 categories:
+**86 total tools** across 10 categories:
 - Console Read (9): list/get requests, projects, tickets, documents, dashboard stats, activity search
 - Console Write (5): create request/ticket, update status, add comment
-- Paperless (15): documents (search/list/get/upload/update/delete), tags (list/create/delete), correspondents (list/create/delete), document types (list/create/delete)
+- Paperless Read (3): search, list, get documents
+- Paperless Write (3): upload, update, delete documents
+- Paperless Tags (4): list, create, update, delete tags
+- Paperless Meta (6): list/create/update/delete correspondents and document types
+- Paperless Storage Paths (4): list, create, update, delete storage paths
+- Paperless Custom Fields (3): list, create, delete custom fields
+- Paperless Notes (3): list, add, delete document notes
+- Paperless Bulk & Discovery (4): bulk edit, similar documents, background tasks, search autocomplete
 - n8n (37): full REST API coverage — workflows, executions, credentials, tags, variables, users, projects, source control, audit
 - System Admin (3): system status, check updates, update history
 
 **5 system agents** (always present, defined in `predefined.ts`):
 - Operator One (supervisor) — routes requests, no direct tools
-- Console Operator — 16 console tools (incl. Paperless search/list), all roles
-- Documents Operator — 15 Paperless tools, all roles
+- Console Operator — 18 console tools (incl. Paperless search/list/similar/autocomplete), all roles
+- Documents Operator — 32 Paperless tools (full API coverage), all roles
 - Workflow Operator — 37 n8n tools, admin+
 - System Admin Operator — 3 admin tools, admin+
 
@@ -301,7 +308,8 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/agents/agent-registry.ts` — Loads agents, builds delegation tools, handles DB overrides
 - `modules/console/app/src/lib/ai/agents/agent-factory.ts` — Creates sub-agent ToolLoopAgent with resolved tools + skills
 - `modules/console/app/src/lib/ai/agents/predefined.ts` — System + template agent definitions
-- `modules/console/app/src/lib/ai/agents/tool-registry.ts` — Centralized tool catalog (69 entries) with role filtering
+- `modules/console/app/src/lib/ai/agents/tool-registry.ts` — Centralized tool catalog (86 entries) with role filtering
+- `modules/console/app/src/lib/ai/agents/integrations.ts` — Toggleable integration definitions (n8n, Paperless, System Admin) and always-on categories
 - `modules/console/app/src/lib/ai/agents/types.ts` — AgentDefinition, AgentContext, SkillDefinition types
 - `modules/console/app/src/lib/ai/system-prompt.ts` — Role-aware system prompt builder
 - `modules/console/app/src/lib/ai/session-context.ts` — Gets authenticated user's orgId, clientId, role
@@ -311,7 +319,7 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/tools/console-write-tools.ts` — 5 write tools (member+)
 - `modules/console/app/src/lib/ai/tools/n8n-tools.ts` — 37 n8n tools (admin+)
 - `modules/console/app/src/lib/ai/tools/admin-tools.ts` — 3 system admin tools (admin+)
-- `modules/console/app/src/lib/ai/tools/paperless-tools.ts` — 15 Paperless-ngx tools (viewer/member/admin)
+- `modules/console/app/src/lib/ai/tools/paperless-tools.ts` — 32 Paperless-ngx tools (viewer/member/admin)
 - `modules/console/app/src/lib/ai/n8n-client.ts` — n8n REST API client
 - `modules/console/app/src/lib/ai/admin-client.ts` — Admin MCP HTTP API client
 - `modules/console/app/src/lib/ai/triage.ts` — Proactive triage logic (generateText, non-streaming)

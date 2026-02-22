@@ -86,6 +86,7 @@ Guidelines:
     minRole: "viewer",
     icon: "FileText",
     color: "#22d3ee",
+    modelRecommendation: "Gemini 2.5 Flash recommended",
     maxSteps: 5,
     allowedTools: [
       "search_paperless_documents",

@@ -61,6 +61,7 @@ interface AgentEditorProps {
     icon?: string | null;
     color?: string | null;
     modelOverride?: string | null;
+    modelRecommendation?: string | null;
     maxSteps: number;
     allowedTools: string[];
     toolSettings?: Record<string, Record<string, string>>;
@@ -686,6 +687,11 @@ export function AgentEditor({ agent, onClose }: AgentEditorProps) {
                       ))
                     )}
                   </select>
+                )}
+                {agent?.modelRecommendation && (
+                  <p className="mt-1 text-[10px] text-neon-cyan/70">
+                    {agent.modelRecommendation}
+                  </p>
                 )}
               </div>
             </>

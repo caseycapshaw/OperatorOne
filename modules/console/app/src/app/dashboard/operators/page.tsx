@@ -33,6 +33,7 @@ interface AgentRow {
   allowedTools: string[];
   instructions: string;
   modelOverride?: string | null;
+  modelRecommendation?: string | null;
 }
 
 const CATEGORY_BADGE: Record<string, { label: string; color: string; Icon: typeof Bot }> = {
