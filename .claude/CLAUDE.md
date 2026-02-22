@@ -216,7 +216,9 @@ The AI system supports two backends, switchable via `AI_PROVIDER` env var:
 
 ### AI Model Selection
 
-The default Claude model is configurable per-org via the admin page dropdown. Model resolution priority:
+The default model is configurable per-org via the admin page dropdown. Models are fetched **dynamically** from the active provider's API with fallback to hardcoded lists.
+
+**Model resolution priority (unchanged):**
 
 | Priority | Source | Set By |
 |----------|--------|--------|
@@ -225,10 +227,28 @@ The default Claude model is configurable per-org via the admin page dropdown. Mo
 | 3 | `AI_MODEL` env var | `.env` / Docker Compose |
 | 4 | `DEFAULT_MODEL_ID` | Hardcoded (`claude-sonnet-4-5-20250929`) |
 
-- `models.ts` defines `AVAILABLE_MODELS` catalog, `isValidModelId()`, and `resolveDefaultModel(orgId?)`
-- `resolveDefaultModel()` is used by `supervisor.ts`, `agent-factory.ts`, and `triage.ts`
-- Admin dropdown PATCHes to `/api/admin/secrets` with `aiModel` field, stores in `organizations.ai_model`
+**Dynamic model fetching:**
+- `models.ts` fetches models from provider APIs: Anthropic (`GET /v1/models` with API key) or OpenRouter (`GET /api/v1/models`, public)
+- In-memory cache with 5-minute TTL, per-provider — busted on key/provider changes
+- Falls back to `FALLBACK_ANTHROPIC_MODELS` (3 Claude models) or `FALLBACK_OPENROUTER_MODELS` (10 curated models) when API is unreachable
+- `getAvailableModels(provider)` returns `{ models: ModelInfo[], source: "api"|"fallback" }`
+- `invalidateModelCache(provider?)` clears cache; called after saving API keys or switching providers
+
+**OpenRouter curation:**
+- Curated provider prefixes: `anthropic`, `openai`, `google`, `moonshotai`, `meta-llama`, `mistralai`, `deepseek`, `cohere`
+- Per-provider caps: OpenAI limited to 2 models (top by context length)
+- Sorted by provider group order, then context length descending, global cap of 30
+- Admin UI groups models by provider using `<optgroup>` labels
+
+**API endpoints:**
+- `GET /api/admin/models` — returns available models for the active provider; `?refresh=true` busts cache
+- `PATCH /api/admin/secrets` with `aiModel` field — validates async against the active provider's fetched model list
 - Setting the dropdown to "Default" resets `ai_model` to null (falls through to env/hardcoded)
+
+**Key functions:**
+- `resolveDefaultModel(orgId?)` — resolves model ID (does NOT validate — accepts whatever admin saved)
+- `isValidModelId(id, provider)` — async, checks against fetched model list for the given provider
+- `getModelName(id)` — quick name lookup from fallback lists
 
 ### AI Agent Architecture (Supervisor/Delegation Pattern)
 
@@ -275,7 +295,7 @@ User Message → Supervisor (Operator One)
 - `tool-registry.ts`: centralized catalog mapping tool names → implementations with role enforcement
 
 ### AI Agent Files
-- `modules/console/app/src/lib/ai/models.ts` — Model catalog (AVAILABLE_MODELS), validation, resolveDefaultModel()
+- `modules/console/app/src/lib/ai/models.ts` — Dynamic model catalog (API fetch + cache + fallbacks), getAvailableModels(), resolveDefaultModel()
 - `modules/console/app/src/lib/ai/provider.ts` — Provider-agnostic ModelFactory, getModelFactory(), getActiveProvider()
 - `modules/console/app/src/lib/ai/agents/supervisor.ts` — Creates supervisor ToolLoopAgent with delegation tools
 - `modules/console/app/src/lib/ai/agents/agent-registry.ts` — Loads agents, builds delegation tools, handles DB overrides
@@ -298,6 +318,7 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/app/api/chat/route.ts` — Streaming chat (streamText + toUIMessageStreamResponse)
 - `modules/console/app/src/app/api/chat/conversations/route.ts` — List/create conversations
 - `modules/console/app/src/app/api/chat/conversations/[id]/route.ts` — Get/delete conversation
+- `modules/console/app/src/app/api/admin/models/route.ts` — Dynamic model list endpoint (GET, admin-only, cache-bustable)
 - `modules/console/app/src/app/api/agent/triage/route.ts` — Proactive triage endpoint (POST)
 - `modules/console/app/src/components/chat/chat-panel.tsx` — Main chat container (useChat hook)
 - `modules/console/app/src/components/chat/chat-messages.tsx` — Message list with auto-scroll
@@ -462,7 +483,7 @@ User Message → Supervisor (Operator One)
 | Console queries | `modules/console/app/src/lib/queries.ts` |
 | Console server actions | `modules/console/app/src/lib/actions.ts` |
 | Console theme CSS | `modules/console/app/src/styles/globals.css` |
-| AI model catalog | `modules/console/app/src/lib/ai/models.ts` |
+| AI model catalog | `modules/console/app/src/lib/ai/models.ts` (dynamic fetch + cache + fallbacks) |
 | AI provider factory | `modules/console/app/src/lib/ai/provider.ts` |
 | AI agent tools | `modules/console/app/src/lib/ai/tools/` |
 | AI agent definitions | `modules/console/app/src/lib/ai/agents/` |
@@ -484,6 +505,7 @@ User Message → Supervisor (Operator One)
 | Admin page | `modules/console/app/src/app/dashboard/admin/page.tsx` |
 | Admin integrations component | `modules/console/app/src/components/console/admin-integrations.tsx` |
 | Admin form component | `modules/console/app/src/components/console/admin-form.tsx` |
+| Admin models API | `modules/console/app/src/app/api/admin/models/route.ts` |
 | Admin secrets API | `modules/console/app/src/app/api/admin/secrets/route.ts` |
 | Admin API route | `modules/console/app/src/app/api/admin/organization/route.ts` |
 | Paperless compose (prod) | `modules/paperless/docker-compose.yml` |
