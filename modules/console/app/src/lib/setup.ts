@@ -129,6 +129,10 @@ export async function clearOrgIdentity(): Promise<void> {
   }
 }
 
+export function getSetupCode(): string | undefined {
+  return process.env.SETUP_CODE || undefined;
+}
+
 export async function markSetupInProgress() {
   const existing = await getSetupConfig();
   if (existing) {

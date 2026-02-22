@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { isSetupComplete } from "@/lib/setup";
+import { isSetupComplete, getSetupCode, markSetupInProgress } from "@/lib/setup";
 import { createSetupToken, verifyCsrfHeader } from "@/lib/setup-jwt";
-import { markSetupInProgress } from "@/lib/setup";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
@@ -53,27 +52,27 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { password } = body as { password?: string };
+  const { setupCode } = body as { setupCode?: string };
 
-  if (!password) {
+  if (!setupCode) {
     return NextResponse.json(
-      { error: "Password required" },
+      { error: "Setup code required" },
       { status: 400 },
     );
   }
 
-  const bootstrapPassword = process.env.AUTHENTIK_BOOTSTRAP_PASSWORD;
-  if (!bootstrapPassword) {
-    console.error("AUTHENTIK_BOOTSTRAP_PASSWORD environment variable is not set");
+  const expectedCode = getSetupCode();
+  if (!expectedCode) {
+    console.error("SETUP_CODE environment variable is not set");
     return NextResponse.json(
       { error: "Server configuration error" },
       { status: 500 },
     );
   }
 
-  if (!safeCompare(password, bootstrapPassword)) {
+  if (!safeCompare(setupCode, expectedCode)) {
     return NextResponse.json(
-      { error: "Invalid password" },
+      { error: "Invalid setup code" },
       { status: 401 },
     );
   }

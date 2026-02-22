@@ -82,6 +82,31 @@ export async function authenticateWithBootstrap(): Promise<string> {
 }
 
 /**
+ * Set the Authentik admin (akadmin) password.
+ * Uses the bootstrap token to authenticate, then sets the new password.
+ */
+export async function setAdminPassword(
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  // Get current user info to find the PK
+  const me = await authentikFetch<{ user: { pk: number } }>(
+    "/api/v3/core/users/me/",
+    token,
+  );
+
+  // Set the new password
+  await authentikFetch<void>(
+    `/api/v3/core/users/${me.user.pk}/set_password/`,
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify({ password: newPassword }),
+    },
+  );
+}
+
+/**
  * Find the default authorization flow.
  */
 export async function getAuthorizationFlow(
