@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     getSupervisorDefinition(ctx),
   ]);
   const delegationTools = buildDelegationTools(availableAgents, ctx, provider);
-  const supervisor = createSupervisor(delegationTools, availableAgents, ctx, provider, supervisorDef);
+  const supervisor = await createSupervisor(delegationTools, availableAgents, ctx, provider, supervisorDef);
 
   return createAgentUIStreamResponse({
     agent: supervisor,

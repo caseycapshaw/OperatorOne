@@ -3,7 +3,14 @@ import { readSecret, writeSecret, checkHealth } from "@/lib/openbao";
 import { resolveProvider } from "@/lib/ai/provider";
 import { getChatSessionContext } from "@/lib/ai/session-context";
 import { hasMinRole } from "@/lib/roles";
-import { getOrgAiProvider, updateOrgAiProvider } from "@/lib/queries";
+import { getOrgAiProvider, updateOrgAiProvider, getOrgAiModel, updateOrgAiModel } from "@/lib/queries";
+import {
+  DEFAULT_MODEL_ID,
+  getAvailableModels,
+  invalidateModelCache,
+  isValidModelId,
+  resolveDefaultModel,
+} from "@/lib/ai/models";
 
 export const dynamic = "force-dynamic";
 
@@ -96,14 +103,27 @@ export async function GET() {
     // No keys configured — report the preference but no active provider
   }
 
+  // Resolve model info
+  const orgAiModel = await getOrgAiModel(ctx.orgId);
+  const resolvedModel = await resolveDefaultModel(ctx.orgId);
+
+  // Fetch dynamic model list for the active provider
+  const activeProvider = resolved.provider as "anthropic" | "openrouter";
+  const modelsResult = await getAvailableModels(activeProvider);
+
   return NextResponse.json({
     anthropicApiKey: resolveKeyStatus(anthropicKey, anthropicSource),
     n8nApiKey: resolveKeyStatus(n8nKey, n8nSource),
     openrouterApiKey: resolveKeyStatus(openrouterKey, openrouterSource),
     paperlessApiToken: resolveKeyStatus(paperlessToken, paperlessSource),
-    aiProvider: resolved.provider as "anthropic" | "openrouter",
+    aiProvider: activeProvider,
     aiProviderPreference: orgPreference,
     aiProviderReason: resolved.reason,
+    aiModel: orgAiModel,
+    aiModelDefault: DEFAULT_MODEL_ID,
+    aiModelResolved: resolvedModel,
+    availableModels: modelsResult.models,
+    availableModelsSource: modelsResult.source,
     openbaoAvailable,
   });
 }
@@ -125,6 +145,7 @@ export async function PATCH(request: Request) {
       openrouterApiKey?: string;
       paperlessApiToken?: string;
       aiProvider?: string;
+      aiModel?: string | null;
     };
 
     if (body.anthropicApiKey !== undefined) {
@@ -151,6 +172,7 @@ export async function PATCH(request: Request) {
             { status: 500 },
           );
         }
+        invalidateModelCache("anthropic");
         return NextResponse.json({ success: true, source: "openbao" });
       }
 
@@ -211,6 +233,7 @@ export async function PATCH(request: Request) {
             { status: 500 },
           );
         }
+        invalidateModelCache("openrouter");
         return NextResponse.json({ success: true, source: "openbao" });
       }
 
@@ -259,7 +282,32 @@ export async function PATCH(request: Request) {
         ctx.orgId,
         body.aiProvider as "auto" | "anthropic" | "openrouter",
       );
+      invalidateModelCache();
       return NextResponse.json({ success: true, aiProvider: body.aiProvider });
+    }
+
+    if (body.aiModel !== undefined) {
+      // null or empty string resets to default
+      const model = body.aiModel ? body.aiModel.trim() : null;
+      if (model) {
+        // Resolve active provider to validate against the correct model list
+        let activeProvider: "anthropic" | "openrouter" = "anthropic";
+        try {
+          const resolved = await resolveProvider(ctx.orgId);
+          activeProvider = resolved.provider;
+        } catch {
+          // No provider — validation will use fallback list
+        }
+        const valid = await isValidModelId(model, activeProvider);
+        if (!valid) {
+          return NextResponse.json(
+            { error: "Selected model is not available for the current provider" },
+            { status: 400 },
+          );
+        }
+      }
+      await updateOrgAiModel(ctx.orgId, model);
+      return NextResponse.json({ success: true, aiModel: model });
     }
 
     return NextResponse.json(

@@ -47,6 +47,27 @@ export async function updateOrgAiProvider(
     .where(eq(organizations.id, orgId));
 }
 
+// ─── AI Model ────────────────────────────────
+
+export async function getOrgAiModel(orgId: string): Promise<string | null> {
+  const [org] = await db
+    .select({ aiModel: organizations.aiModel })
+    .from(organizations)
+    .where(eq(organizations.id, orgId))
+    .limit(1);
+  return org?.aiModel ?? null;
+}
+
+export async function updateOrgAiModel(
+  orgId: string,
+  model: string | null,
+): Promise<void> {
+  await db
+    .update(organizations)
+    .set({ aiModel: model, updatedAt: new Date() })
+    .where(eq(organizations.id, orgId));
+}
+
 // ─── Dashboard ──────────────────────────────
 
 export async function getDashboardData() {

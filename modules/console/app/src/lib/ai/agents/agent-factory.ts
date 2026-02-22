@@ -1,12 +1,11 @@
 import { ToolLoopAgent, stepCountIs } from "ai";
 import type { ModelFactory } from "@/lib/ai/provider";
+import { resolveDefaultModel } from "@/lib/ai/models";
 import { resolveTools } from "./tool-registry";
 import type { AgentDefinition, AgentContext } from "./types";
 import { db } from "@/lib/db";
 import { agentSkills } from "@/db/schema";
 import { eq, and, asc } from "drizzle-orm";
-
-const DEFAULT_MODEL = process.env.AI_MODEL || "claude-sonnet-4-5-20250929";
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -14,7 +13,8 @@ function isUuid(value: string): boolean {
 
 export async function createSubAgent(definition: AgentDefinition, ctx: AgentContext, provider: ModelFactory) {
   const tools = resolveTools(definition.allowedTools, ctx, definition.toolSettings);
-  const model = definition.modelOverride || DEFAULT_MODEL;
+  const defaultModel = await resolveDefaultModel(ctx.orgId);
+  const model = definition.modelOverride || defaultModel;
 
   // Load active skills for DB-backed agents
   const skills = isUuid(definition.id)

@@ -214,6 +214,22 @@ The AI system supports two backends, switchable via `AI_PROVIDER` env var:
 - Admin integrations page shows both provider cards with active indicator
 - Setup wizard Step 4 has an Anthropic/OpenRouter toggle
 
+### AI Model Selection
+
+The default Claude model is configurable per-org via the admin page dropdown. Model resolution priority:
+
+| Priority | Source | Set By |
+|----------|--------|--------|
+| 1 | Per-agent `modelOverride` | Agent editor UI / agents table |
+| 2 | `organizations.ai_model` | Admin page dropdown |
+| 3 | `AI_MODEL` env var | `.env` / Docker Compose |
+| 4 | `DEFAULT_MODEL_ID` | Hardcoded (`claude-sonnet-4-5-20250929`) |
+
+- `models.ts` defines `AVAILABLE_MODELS` catalog, `isValidModelId()`, and `resolveDefaultModel(orgId?)`
+- `resolveDefaultModel()` is used by `supervisor.ts`, `agent-factory.ts`, and `triage.ts`
+- Admin dropdown PATCHes to `/api/admin/secrets` with `aiModel` field, stores in `organizations.ai_model`
+- Setting the dropdown to "Default" resets `ai_model` to null (falls through to env/hardcoded)
+
 ### AI Agent Architecture (Supervisor/Delegation Pattern)
 
 The AI system uses a **supervisor/sub-agent pattern** built on Vercel AI SDK's `ToolLoopAgent`:
@@ -259,6 +275,7 @@ User Message → Supervisor (Operator One)
 - `tool-registry.ts`: centralized catalog mapping tool names → implementations with role enforcement
 
 ### AI Agent Files
+- `modules/console/app/src/lib/ai/models.ts` — Model catalog (AVAILABLE_MODELS), validation, resolveDefaultModel()
 - `modules/console/app/src/lib/ai/provider.ts` — Provider-agnostic ModelFactory, getModelFactory(), getActiveProvider()
 - `modules/console/app/src/lib/ai/agents/supervisor.ts` — Creates supervisor ToolLoopAgent with delegation tools
 - `modules/console/app/src/lib/ai/agents/agent-registry.ts` — Loads agents, builds delegation tools, handles DB overrides
@@ -445,6 +462,7 @@ User Message → Supervisor (Operator One)
 | Console queries | `modules/console/app/src/lib/queries.ts` |
 | Console server actions | `modules/console/app/src/lib/actions.ts` |
 | Console theme CSS | `modules/console/app/src/styles/globals.css` |
+| AI model catalog | `modules/console/app/src/lib/ai/models.ts` |
 | AI provider factory | `modules/console/app/src/lib/ai/provider.ts` |
 | AI agent tools | `modules/console/app/src/lib/ai/tools/` |
 | AI agent definitions | `modules/console/app/src/lib/ai/agents/` |

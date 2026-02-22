@@ -1,8 +1,7 @@
 import { ToolLoopAgent, stepCountIs, type ToolSet } from "ai";
 import type { ModelFactory } from "@/lib/ai/provider";
+import { resolveDefaultModel } from "@/lib/ai/models";
 import type { AgentDefinition, AgentContext } from "./types";
-
-const DEFAULT_MODEL = process.env.AI_MODEL || "claude-sonnet-4-5-20250929";
 
 function buildSupervisorPrompt(
   availableAgents: AgentDefinition[],
@@ -46,7 +45,7 @@ When you need to perform an operation, call the appropriate delegation tool with
   return prompt;
 }
 
-export function createSupervisor(
+export async function createSupervisor(
   delegationTools: ToolSet,
   availableAgents: AgentDefinition[],
   ctx: AgentContext,
@@ -55,7 +54,8 @@ export function createSupervisor(
 ) {
   const customInstructions = definition?.instructions;
   const systemPrompt = buildSupervisorPrompt(availableAgents, ctx, customInstructions);
-  const model = definition?.modelOverride || DEFAULT_MODEL;
+  const defaultModel = await resolveDefaultModel(ctx.orgId);
+  const model = definition?.modelOverride || defaultModel;
   const maxSteps = definition?.maxSteps ?? 3;
 
   return new ToolLoopAgent({

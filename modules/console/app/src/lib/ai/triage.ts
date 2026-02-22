@@ -1,5 +1,6 @@
 import { generateText } from "ai";
 import { getModelFactory } from "@/lib/ai/provider";
+import { resolveDefaultModel } from "@/lib/ai/models";
 import { db } from "@/lib/db";
 import {
   requests,
@@ -9,8 +10,6 @@ import {
   activityLog,
 } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
-
-const model = process.env.AI_MODEL || "claude-sonnet-4-5-20250929";
 
 interface TriageInput {
   entityType: "request" | "ticket";
@@ -64,9 +63,12 @@ ${entityType === "request" ? `Category: ${entity.category}` : ""}
 Recent activity: ${recentActivity.map((a) => a.title).join("; ")}`;
 
   try {
-    const provider = await getModelFactory(orgId);
+    const [provider, modelId] = await Promise.all([
+      getModelFactory(orgId),
+      resolveDefaultModel(orgId),
+    ]);
     const { text } = await generateText({
-      model: provider(model),
+      model: provider(modelId),
       system: systemPrompt,
       prompt: userContent,
       maxOutputTokens: 200,

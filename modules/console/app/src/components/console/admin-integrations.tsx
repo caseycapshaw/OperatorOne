@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { HudFrame } from "@/components/thegridcn/hud-frame";
 import { IntegrationCard, AddCard } from "./integration-card";
 import { SettingsModal } from "./settings-modal";
@@ -13,6 +13,16 @@ interface KeyStatus {
   source: "openbao" | "env" | "none";
 }
 
+interface ModelInfo {
+  id: string;
+  name: string;
+  shortName: string;
+  provider?: string;
+  contextLength?: number;
+  inputPrice?: string;
+  outputPrice?: string;
+}
+
 interface SecretsResponse {
   anthropicApiKey: KeyStatus;
   n8nApiKey: KeyStatus;
@@ -21,7 +31,18 @@ interface SecretsResponse {
   aiProvider: "anthropic" | "openrouter";
   aiProviderPreference: "auto" | "anthropic" | "openrouter";
   aiProviderReason: string;
+  aiModel: string | null;
+  aiModelDefault: string;
+  aiModelResolved: string;
+  availableModels: ModelInfo[];
+  availableModelsSource?: "api" | "fallback";
   openbaoAvailable: boolean;
+}
+
+interface ModelsResponse {
+  models: ModelInfo[];
+  source: "api" | "fallback";
+  provider: "anthropic" | "openrouter";
 }
 
 type ModalId = "anthropic" | "openrouter" | "n8n" | "paperless" | "slack" | "email" | "sms" | null;
@@ -167,23 +188,156 @@ function ComingSoonContent({ name }: { name: string }) {
   );
 }
 
+/* ── Model Dropdown ──────────────────────────── */
+
+function ModelDropdown({
+  models,
+  modelSource,
+  modelProvider,
+  selectedModel,
+  defaultModelId,
+  defaultModelName,
+  modelsLoading,
+  modelSaving,
+  onChange,
+  onRefresh,
+}: {
+  models: ModelInfo[];
+  modelSource: "api" | "fallback";
+  modelProvider: "anthropic" | "openrouter";
+  selectedModel: string | null;
+  defaultModelId: string;
+  defaultModelName: string;
+  modelsLoading: boolean;
+  modelSaving: boolean;
+  onChange: (value: string) => void;
+  onRefresh: () => void;
+}) {
+  // Group models by provider for OpenRouter
+  const grouped = modelProvider === "openrouter"
+    ? models.reduce<Record<string, ModelInfo[]>>((acc, m) => {
+        const group = m.provider || "other";
+        if (!acc[group]) acc[group] = [];
+        acc[group].push(m);
+        return acc;
+      }, {})
+    : null;
+
+  // Provider display names for optgroup labels
+  const providerLabels: Record<string, string> = {
+    anthropic: "Anthropic",
+    openai: "OpenAI",
+    google: "Google",
+    moonshotai: "MoonshotAI",
+    "meta-llama": "Meta",
+    mistralai: "Mistral",
+    deepseek: "DeepSeek",
+    cohere: "Cohere",
+  };
+
+  return (
+    <div className="mb-3 space-y-2">
+      <div className="flex items-center gap-2 text-xs text-text-muted">
+        <span>Default Model:</span>
+        {modelsLoading ? (
+          <span className="px-3 py-1 text-[10px] text-text-muted/50">Loading models...</span>
+        ) : (
+          <select
+            value={selectedModel ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={modelSaving}
+            className="border border-grid-border bg-grid-black/50 px-3 py-1 text-xs text-text-primary outline-none focus:border-neon-cyan disabled:opacity-50"
+          >
+            <option value="">
+              Default ({defaultModelName})
+            </option>
+            {grouped ? (
+              // OpenRouter: grouped by provider
+              Object.entries(grouped).map(([provider, providerModels]) => (
+                <optgroup key={provider} label={providerLabels[provider] || provider}>
+                  {providerModels.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.shortName}{m.contextLength ? ` (${Math.round(m.contextLength / 1000)}k)` : ""}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            ) : (
+              // Anthropic: flat list
+              models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))
+            )}
+          </select>
+        )}
+        {modelSaving && (
+          <span className="text-[10px] text-text-muted/50">Saving...</span>
+        )}
+        {!modelsLoading && (
+          <button
+            onClick={onRefresh}
+            className="text-[10px] text-text-muted/50 transition-colors hover:text-neon-cyan"
+            title="Refresh model list"
+          >
+            Refresh
+          </button>
+        )}
+      </div>
+      <div className="text-[10px] text-text-muted/50">
+        {selectedModel ? (
+          <>Active: <span className="text-neon-cyan">{models.find((m) => m.id === selectedModel)?.name ?? selectedModel}</span></>
+        ) : (
+          <>Using system default</>
+        )}
+        {modelSource === "fallback" && !modelsLoading && (
+          <span className="ml-2 text-yellow-400/70">(cached list — API unavailable)</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Component ───────────────────────────── */
 
 export function AdminIntegrations() {
   const [secrets, setSecrets] = useState<SecretsResponse | null>(null);
   const [activeModal, setActiveModal] = useState<ModalId>(null);
   const [providerSaving, setProviderSaving] = useState(false);
+  const [modelSaving, setModelSaving] = useState(false);
 
-  function fetchSecrets() {
+  // Dynamic model list state
+  const [modelList, setModelList] = useState<ModelInfo[]>([]);
+  const [modelSource, setModelSource] = useState<"api" | "fallback">("fallback");
+  const [modelProvider, setModelProvider] = useState<"anthropic" | "openrouter">("anthropic");
+  const [modelsLoading, setModelsLoading] = useState(true);
+
+  const fetchSecrets = useCallback(() => {
     fetch("/api/admin/secrets")
       .then((res) => res.json())
       .then((data: SecretsResponse) => setSecrets(data))
       .catch(() => {});
-  }
+  }, []);
+
+  const fetchModels = useCallback((refresh = false) => {
+    setModelsLoading(true);
+    const url = refresh ? "/api/admin/models?refresh=true" : "/api/admin/models";
+    fetch(url)
+      .then((res) => res.json())
+      .then((data: ModelsResponse) => {
+        setModelList(data.models);
+        setModelSource(data.source);
+        setModelProvider(data.provider);
+      })
+      .catch(() => {})
+      .finally(() => setModelsLoading(false));
+  }, []);
 
   useEffect(() => {
     fetchSecrets();
-  }, []);
+    fetchModels();
+  }, [fetchSecrets, fetchModels]);
 
   async function handleProviderChange(value: "auto" | "anthropic" | "openrouter") {
     setProviderSaving(true);
@@ -195,12 +349,35 @@ export function AdminIntegrations() {
       });
       if (res.ok) {
         fetchSecrets();
+        fetchModels();
       }
     } catch {
       // Network error — silently fail, next fetchSecrets will re-sync
     } finally {
       setProviderSaving(false);
     }
+  }
+
+  async function handleModelChange(value: string) {
+    setModelSaving(true);
+    try {
+      const res = await fetch("/api/admin/secrets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ aiModel: value || null }),
+      });
+      if (res.ok) {
+        fetchSecrets();
+      }
+    } catch {
+      // Network error — silently fail, next fetchSecrets will re-sync
+    } finally {
+      setModelSaving(false);
+    }
+  }
+
+  function handleRefreshModels() {
+    fetchModels(true);
   }
 
   const anthropicStatus = secrets?.anthropicApiKey;
@@ -210,6 +387,11 @@ export function AdminIntegrations() {
   const activeProvider = secrets?.aiProvider ?? "anthropic";
   const preference = secrets?.aiProviderPreference ?? "auto";
   const providerReason = secrets?.aiProviderReason ?? "";
+
+  // Resolve default model name for the dropdown
+  const defaultModelName = modelList.find((m) => m.id === secrets?.aiModelDefault)?.shortName
+    ?? secrets?.availableModels?.find((m) => m.id === secrets?.aiModelDefault)?.shortName
+    ?? "Sonnet 4.5";
 
   return (
     <>
@@ -267,6 +449,21 @@ export function AdminIntegrations() {
             )}
           </div>
         </div>
+
+        {/* Model selector */}
+        <ModelDropdown
+          models={modelList}
+          modelSource={modelSource}
+          modelProvider={modelProvider}
+          selectedModel={secrets?.aiModel ?? null}
+          defaultModelId={secrets?.aiModelDefault ?? "claude-sonnet-4-5-20250929"}
+          defaultModelName={defaultModelName}
+          modelsLoading={modelsLoading}
+          modelSaving={modelSaving}
+          onChange={handleModelChange}
+          onRefresh={handleRefreshModels}
+        />
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <IntegrationCard
             name="Anthropic"
@@ -404,7 +601,7 @@ export function AdminIntegrations() {
             bodyKey="anthropicApiKey"
             status={anthropicStatus ?? null}
             openbaoAvailable={secrets?.openbaoAvailable ?? false}
-            onSaved={fetchSecrets}
+            onSaved={() => { fetchSecrets(); fetchModels(true); }}
           />
         </div>
       </SettingsModal>
@@ -446,7 +643,7 @@ export function AdminIntegrations() {
             bodyKey="openrouterApiKey"
             status={openrouterStatus ?? null}
             openbaoAvailable={secrets?.openbaoAvailable ?? false}
-            onSaved={fetchSecrets}
+            onSaved={() => { fetchSecrets(); fetchModels(true); }}
           />
         </div>
       </SettingsModal>

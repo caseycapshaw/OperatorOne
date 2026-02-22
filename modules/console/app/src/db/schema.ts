@@ -113,6 +113,7 @@ export const organizations = pgTable("organizations", {
   domain: varchar("domain", { length: 255 }),
   logoUrl: text("logo_url"),
   aiProvider: varchar("ai_provider", { length: 20 }).default("auto"),
+  aiModel: varchar("ai_model", { length: 100 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
