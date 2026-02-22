@@ -2,7 +2,7 @@
 
 This guide walks through the Authentik configuration needed to enable SSO across the stack. All steps can be done via the Authentik Admin UI or the API (`/api/v3/`).
 
-> **Setup Wizard:** Steps 5 (Grafana OAuth) and 10 (Console OAuth) are now **automated by the Console Setup Wizard**. On first boot, visit `console.localhost` and the 5-step wizard will capture organization identity, create both OAuth2 providers, copy credentials to `.env`, and restart services. You only need this guide for forward auth setup (steps 3-4), user/group management (steps 6-7), or troubleshooting.
+> **Setup Wizard:** Steps 5 (Grafana OAuth) and 10 (Console OAuth) are now **automated by the Console Setup Wizard**. On first boot, visit `console.localhost` and the 3-step wizard will capture organization identity, create both OAuth2 providers, copy credentials to `.env`, and restart services. You only need this guide for forward auth setup (steps 3-4), user/group management (steps 6-7), or troubleshooting.
 
 **SSO Strategy:**
 - **Forward Auth** (Traefik middleware) — n8n, Paperless-ngx, Traefik dashboard
@@ -381,7 +381,7 @@ curl -X PATCH http://auth.localhost/api/v3/core/applications/n8n/ \
 
 ## 10. Create OAuth2 Provider & Application for Console
 
-> **Automated:** The Console Setup Wizard handles this entire section automatically. On first boot, visit `console.localhost` and complete the 5-step wizard. The steps below are only needed for manual setup or troubleshooting.
+> **Automated:** The Console Setup Wizard handles this entire section automatically. On first boot, visit `console.localhost` and complete the 3-step wizard. The steps below are only needed for manual setup or troubleshooting.
 
 The Console uses OAuth2/OIDC (same pattern as Grafana). It handles its own auth via Auth.js v5 — do **not** use forward auth middleware.
 

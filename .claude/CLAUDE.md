@@ -212,7 +212,7 @@ The AI system supports two backends, switchable via `AI_PROVIDER` env var:
 - When OpenRouter is active, bare Claude model IDs (e.g. `claude-sonnet-4-5-20250929`) are auto-prefixed with `anthropic/` so existing agent definitions, `AI_MODEL`, and `modelOverride` all work unchanged
 - All consumers (supervisor, agent-factory, agent-registry, triage, chat route) use `ModelFactory` — no Anthropic-specific types leak outside `provider.ts`
 - Admin integrations page shows both provider cards with active indicator
-- Setup wizard Step 4 has an Anthropic/OpenRouter toggle
+- Setup wizard Step 2 has an Anthropic/OpenRouter toggle (optional, can be skipped)
 
 ### AI Model Selection
 
@@ -310,7 +310,7 @@ User Message → Supervisor (Operator One)
 - `modules/console/app/src/lib/ai/agents/predefined.ts` — System + template agent definitions
 - `modules/console/app/src/lib/ai/agents/tool-registry.ts` — Centralized tool catalog (86 entries) with role filtering
 - `modules/console/app/src/lib/ai/agents/integrations.ts` — Toggleable integration definitions (n8n, Paperless, System Admin) and always-on categories
-- `modules/console/app/src/lib/ai/agents/types.ts` — AgentDefinition, AgentContext, SkillDefinition types
+- `modules/console/app/src/lib/ai/agents/types.ts` — AgentDefinition (incl. optional `modelRecommendation`), AgentContext, SkillDefinition types
 - `modules/console/app/src/lib/ai/system-prompt.ts` — Role-aware system prompt builder
 - `modules/console/app/src/lib/ai/session-context.ts` — Gets authenticated user's orgId, clientId, role
 - `modules/console/app/src/lib/ai/paperless-client.ts` — Paperless-ngx REST API client
@@ -436,7 +436,7 @@ User Message → Supervisor (Operator One)
 ### Console Fresh Deployment
 - DB schema auto-applied on startup via `entrypoint.sh` (`drizzle-kit push`)
 - First user login auto-creates the organization (using identity from setup wizard if available, otherwise defaults) and assigns the user as admin
-- Setup wizard is 5 steps: authenticate, org identity, SSO providers, external services, apply
+- Setup wizard is 3 steps: (1) identity & password (setup code, admin password, org name, domain, operator), (2) AI provider (optional Anthropic/OpenRouter toggle + API key), (3) apply (fully automated — creates SSO providers, initializes OpenBao, generates Paperless token, writes `.env`, restarts services)
 - Setup wizard creates OAuth2 providers idempotently (safe to retry after page refresh)
 - Setup wizard stores credentials in `setup_config` table before writing to `.env`
 - Organization identity (name, domain, operator) is stored in `setup_config.org_identity` and applied on first login
@@ -446,7 +446,7 @@ User Message → Supervisor (Operator One)
 - Console reads secrets via `lib/openbao.ts` (HTTP client for KV v2 API), falls back to `process.env`
 - `lib/secrets.ts` caches OpenBao health for 60 seconds — if OpenBao is unreachable, falls back to env vars silently
 - **Dev setup:** `OPENBAO_ADDR` and `OPENBAO_SERVICE_TOKEN` are set in the base `modules/console/docker-compose.yml` and inherited by dev via Docker Compose merge. If `OPENBAO_SERVICE_TOKEN` is empty in `.env` (before running `init-openbao.sh`), OpenBao reads will fail silently and all secrets fall back to env vars.
-- **Prod setup:** Run `scripts/init-openbao.sh` first to initialize vault, enable KV v2, create policy, and generate a service token. Add `OPENBAO_SERVICE_TOKEN` to `.env`, then restart console.
+- **Prod setup:** The setup wizard auto-initializes OpenBao (via `openbao-init.ts`). For manual init, run `scripts/init-openbao.sh` to initialize vault, enable KV v2, create policy, and generate a service token. Add `OPENBAO_SERVICE_TOKEN` to `.env`, then restart console.
 - **Key files:** `modules/console/app/src/lib/openbao.ts` (HTTP client), `modules/console/app/src/lib/secrets.ts` (OpenBao-first, env-fallback reader)
 - Secrets stored at paths like `services/anthropic`, `services/openrouter`, `services/n8n` in OpenBao KV v2
 - Admin page at `/dashboard/admin` can write secrets to OpenBao via the console UI
@@ -512,6 +512,10 @@ User Message → Supervisor (Operator One)
 | Setup wizard | `modules/console/app/src/components/setup/SetupWizard.tsx` |
 | Setup utilities | `modules/console/app/src/lib/setup.ts` |
 | Setup apply API | `modules/console/app/src/app/api/setup/apply/route.ts` |
+| Authentik API client | `modules/console/app/src/lib/authentik-client.ts` |
+| OpenBao auto-init | `modules/console/app/src/lib/openbao-init.ts` |
+| Paperless token gen | `modules/console/app/src/lib/paperless-token.ts` |
+| Startup script | `scripts/start.sh` |
 | Admin page | `modules/console/app/src/app/dashboard/admin/page.tsx` |
 | Admin integrations component | `modules/console/app/src/components/console/admin-integrations.tsx` |
 | Admin form component | `modules/console/app/src/components/console/admin-form.tsx` |

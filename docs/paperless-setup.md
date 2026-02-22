@@ -135,7 +135,9 @@ Internal:
 
 ## AI Agent Tools
 
-The Documents Operator sub-agent has 15 tools for managing Paperless:
+The Documents Operator sub-agent has 32 tools for managing Paperless across 9 categories:
+
+**Documents (6 tools)**
 
 | Tool | Role | Description |
 |------|------|-------------|
@@ -145,15 +147,67 @@ The Documents Operator sub-agent has 15 tools for managing Paperless:
 | `upload_paperless_document` | member | Upload new document |
 | `update_paperless_document` | member | Update metadata |
 | `delete_paperless_document` | admin | Delete document |
+
+**Tags (4 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
 | `list_paperless_tags` | viewer | List tags |
 | `create_paperless_tag` | member | Create tag |
+| `update_paperless_tag` | member | Rename/update tag |
 | `delete_paperless_tag` | admin | Delete tag |
+
+**Correspondents (4 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
 | `list_paperless_correspondents` | viewer | List correspondents |
 | `create_paperless_correspondent` | member | Create correspondent |
+| `update_paperless_correspondent` | member | Rename/update correspondent |
 | `delete_paperless_correspondent` | admin | Delete correspondent |
+
+**Document Types (4 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
 | `list_paperless_document_types` | viewer | List document types |
 | `create_paperless_document_type` | member | Create document type |
+| `update_paperless_document_type` | member | Rename/update document type |
 | `delete_paperless_document_type` | admin | Delete document type |
+
+**Storage Paths (4 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
+| `list_paperless_storage_paths` | viewer | List storage paths |
+| `create_paperless_storage_path` | member | Create storage path |
+| `update_paperless_storage_path` | member | Update storage path |
+| `delete_paperless_storage_path` | admin | Delete storage path |
+
+**Custom Fields (3 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
+| `list_paperless_custom_fields` | viewer | List custom fields |
+| `create_paperless_custom_field` | member | Create custom field |
+| `delete_paperless_custom_field` | admin | Delete custom field |
+
+**Document Notes (3 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
+| `list_paperless_document_notes` | viewer | List notes on a document |
+| `add_paperless_document_note` | member | Add a note to a document |
+| `delete_paperless_document_note` | admin | Delete a document note |
+
+**Bulk & Discovery (4 tools)**
+
+| Tool | Role | Description |
+|------|------|-------------|
+| `bulk_edit_paperless_documents` | member | Bulk edit document metadata |
+| `get_similar_documents` | viewer | Find similar documents |
+| `get_paperless_tasks` | viewer | List background tasks |
+| `search_autocomplete` | viewer | Search autocomplete suggestions |
 
 ## Troubleshooting
 

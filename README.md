@@ -128,6 +128,7 @@ operatorone/
 │       ├── provisioning/        # Datasource and dashboard providers
 │       └── dashboards/          # Pre-built Grafana dashboard JSON
 ├── scripts/
+│   ├── start.sh                 # One-command startup (generates .env, setup code, starts stack)
 │   ├── generate-secrets.sh      # Generate all secrets for a new deployment
 │   ├── init-multiple-dbs.sh     # PostgreSQL multi-database init (runs on first start)
 │   ├── check-updates.sh         # Scan all components for available updates
@@ -159,20 +160,13 @@ operatorone/
 git clone https://github.com/caseycapshaw/OperatorOne.git
 cd OperatorOne
 
-# 2. Generate secrets
-chmod +x scripts/generate-secrets.sh
-./scripts/generate-secrets.sh > .env
+# 2. One-command start (generates .env, setup code, starts all services)
+./scripts/start.sh
 
-# 3. Edit .env -- set DOMAIN and ACME_EMAIL (use defaults for local dev)
+# 3. Open the setup wizard URL printed in the terminal
+#    Enter the one-time setup code shown in the terminal output
 
-# 4. Start services with dev overrides (HTTP, no TLS, all modules)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml \
-  -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
-  -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
-  -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
-  up -d
-
-# 5. Access services at *.localhost:
+# 4. Access services at *.localhost:
 #   - Console:    http://console.localhost
 #   - Documents:  http://docs.localhost
 #   - Automation: http://automation.localhost
@@ -180,53 +174,77 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml \
 #   - Traefik:    http://traefik.localhost
 ```
 
+<details>
+<summary>Manual startup (without start.sh)</summary>
+
+```bash
+# Generate secrets
+chmod +x scripts/generate-secrets.sh
+./scripts/generate-secrets.sh > .env
+
+# Start services with dev overrides (HTTP, no TLS, all modules)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml \
+  -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
+  -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
+  -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
+  up -d
+```
+
+</details>
+
 ### Production Deployment
 
 ```bash
-# 1. Generate secrets
-./scripts/generate-secrets.sh > .env
+# 1. One-command start with your domain
+./scripts/start.sh --domain yourdomain.com
 
-# 2. Configure your domain in .env
-#    Set DOMAIN and ACME_EMAIL
+# 2. Open the setup wizard URL printed in the terminal
+#    Enter the one-time setup code shown in the terminal output
 
-# 3. Start with production overrides (pinned versions, TLS, all modules)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml \
-  -f modules/console/docker-compose.yml \
-  -f modules/admin/docker-compose.yml \
-  -f modules/paperless/docker-compose.yml \
-  up -d
-
-# 4. Wait for services to initialize (2-3 minutes)
-docker compose logs -f
-
-# 5. Access services:
+# 3. Access services:
 #   - Console:    https://console.yourdomain.com
 #   - Documents:  https://docs.yourdomain.com
 #   - Automation: https://automation.yourdomain.com
 #   - SSO:        https://auth.yourdomain.com
 ```
 
+<details>
+<summary>Manual startup (without start.sh)</summary>
+
+```bash
+# Generate secrets
+./scripts/generate-secrets.sh > .env
+
+# Configure your domain in .env (set DOMAIN and ACME_EMAIL)
+
+# Start with production overrides (pinned versions, TLS, all modules)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+  -f modules/console/docker-compose.yml \
+  -f modules/admin/docker-compose.yml \
+  -f modules/paperless/docker-compose.yml \
+  up -d
+```
+
+</details>
+
 ### Initial Configuration
 
-After services start, the **Console Setup Wizard** automates OAuth provider creation, API key entry, and `.env` configuration.
+After services start, the **Console Setup Wizard** automates OAuth provider creation, OpenBao initialization, Paperless token generation, API key entry, and `.env` configuration.
 
 1. **Open the Console** (`https://console.yourdomain.com` or `http://console.localhost`)
    - The wizard launches automatically on first boot (detects missing OAuth config)
 
-2. **Complete the 5-step wizard:**
-   1. **Authenticate** -- Enter the bootstrap password from `.env`
-   2. **Organization Identity** -- Set organization name, domain, and primary operator details
-   3. **Configure SSO** -- Auto-creates Console + Grafana OAuth2 providers in Authentik
-   4. **External Services** -- Optionally enter Anthropic API key, SMTP, Slack webhook
-   5. **Apply & Restart** -- Writes credentials to `.env` and restarts services
+2. **Complete the 3-step wizard:**
+   1. **Identity & Password** -- Enter the setup code from the terminal, set admin password, organization name, domain, and operator details
+   2. **AI Provider** -- Optionally choose Anthropic or OpenRouter and enter an API key (can be skipped)
+   3. **Apply** -- Fully automated: creates SSO providers in Authentik, initializes OpenBao, generates Paperless API token, writes `.env`, and restarts services
 
 3. **After the wizard completes**, finish the remaining manual steps:
 
-   - **OpenBao Setup** -- Run `./scripts/init-openbao.sh` to initialize vault, create policy, and get service token
    - **Authentik Users** (https://auth.yourdomain.com) -- Create user accounts, assign groups
    - **n8n Setup** (https://automation.yourdomain.com) -- Import workflows from `config/n8n/workflows/`
 
-> **Note:** The wizard handles the most error-prone step (Authentik OAuth provider creation) automatically. For manual SSO setup or troubleshooting, see [SSO Setup Guide](docs/sso-setup.md).
+> **Note:** The wizard handles the most error-prone steps (Authentik OAuth provider creation, OpenBao initialization, Paperless token generation) automatically. For manual SSO setup or troubleshooting, see [SSO Setup Guide](docs/sso-setup.md).
 
 ## Core Services
 
@@ -262,7 +280,7 @@ Pre-configured dashboards:
 
 ## Modules
 
-Modules extend the core stack with additional services. Both modules are included in the standard compose commands above.
+Modules extend the core stack with additional services. All modules are included in the standard compose commands above.
 
 ### Available Modules
 
@@ -270,7 +288,7 @@ Modules extend the core stack with additional services. Both modules are include
 |--------|--------|-------------|
 | `admin` | Implemented | AI-administered system updates via MCP server + HTTP API. See [Agent-Administered Updates](docs/AGENT-ADMINISTERED-UPDATES.md). |
 | `console` | Implemented | Client-facing operations hub with AI chat agent. Next.js 15, Vercel AI SDK v6, Auth.js + Authentik SSO, Drizzle ORM. See [SSO Setup](docs/sso-setup.md#10-create-oauth2-provider--application-for-console). |
-| `paperless` | Implemented | Document management powered by Paperless-ngx with OCR, full-text search, and 15 AI tools via the Documents Operator sub-agent. See [Paperless Setup](docs/paperless-setup.md). |
+| `paperless` | Implemented | Document management powered by Paperless-ngx with OCR, full-text search, and 32 AI tools via the Documents Operator sub-agent. See [Paperless Setup](docs/paperless-setup.md). |
 
 ### Console + AI Operations Agent
 
@@ -284,7 +302,7 @@ Modules extend the core stack with additional services. Both modules are include
 The console module provides a client-facing operations dashboard with an **AI-powered chat interface** as the primary UX. The AI system uses a **supervisor/sub-agent architecture** — Operator One routes requests to specialized operators (Console, Workflow, System Admin) that each have their own tools. Custom and template agents can be added per-organization via the database.
 
 **Key features:**
-- **69 role-gated tools**: 9 console read (all roles), 5 console write (member+), 15 Paperless (viewer/member/admin), 37 n8n (admin+), 3 system admin (admin+)
+- **86 role-gated tools**: 9 console read (all roles), 5 console write (member+), 32 Paperless (viewer/member/admin), 37 n8n (admin+), 3 system admin (admin+)
 - **Supervisor/delegation pattern**: Operator One delegates to sub-agents via `delegate_to_<slug>` tools (ToolLoopAgent from Vercel AI SDK)
 - **5 system agents**: Operator One (supervisor), Console Operator, Documents Operator, Workflow Operator, System Admin Operator
 - **4 template agents** (installable per-org): Marketing, Customer Success, Accounting, Website Operator
@@ -298,17 +316,15 @@ The console module provides a client-facing operations dashboard with an **AI-po
 
 ### Setup Wizard
 
-On first boot, the console detects missing OAuth configuration and enters **setup mode**, redirecting all traffic to a 5-step wizard:
+On first boot, the console detects missing OAuth configuration and enters **setup mode**, redirecting all traffic to a streamlined 3-step wizard:
 
-1. **Authenticate** -- Verify identity with the bootstrap password from `.env`
-2. **Organization Identity** -- Set organization name, domain, and primary operator details
-3. **Configure SSO** -- Auto-create OAuth2 providers for Console and Grafana in Authentik via API
-4. **External Services** -- Optionally configure Anthropic API key, SMTP, and Slack webhook
-5. **Apply & Restart** -- Write all credentials to `.env` and restart affected services
+1. **Identity & Password** -- Enter the setup code displayed in the terminal, set admin password (min 12 characters), organization name, website domain, and primary operator name/email
+2. **AI Provider** -- Optionally select Anthropic (direct) or OpenRouter and enter an API key. This step can be skipped and configured later via the admin page
+3. **Apply** -- Fully automated configuration: creates Console + Grafana OAuth2 providers in Authentik, initializes OpenBao vault, generates Paperless API token, writes all credentials to `.env`, and restarts affected services. Progress streams in real-time via SSE
 
-The wizard eliminates the most error-prone manual step in new deployments: navigating the Authentik admin UI to create OAuth2 providers, copy client IDs/secrets, and update `.env`. After completion, the wizard locks itself out (returns 403) and the console enters normal operation.
+The wizard eliminates the most error-prone steps in new deployments: Authentik OAuth provider creation, OpenBao initialization, and Paperless token generation -- all fully automated. After completion, the wizard locks itself out (returns 403) and redirects to the login page with a 10-second countdown.
 
-**Security:** Protected by bootstrap password authentication, short-lived JWT for API calls, and automatic lockout after completion. No credentials are stored in the database -- `.env` remains the single source of truth.
+**Security:** Protected by one-time setup code authentication (auto-generated on first start), short-lived JWT for API calls, and automatic lockout after completion. No credentials are stored in the database -- `.env` remains the single source of truth.
 
 ### Adding Custom MCP Servers
 
