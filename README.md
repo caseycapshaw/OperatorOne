@@ -318,9 +318,15 @@ The console module provides a client-facing operations dashboard with an **AI-po
 
 On first boot, the console detects missing OAuth configuration and enters **setup mode**, redirecting all traffic to a streamlined 3-step wizard:
 
-1. **Identity & Password** -- Enter the setup code displayed in the terminal, set admin password (min 12 characters), organization name, website domain, and primary operator name/email
-2. **AI Provider** -- Optionally select Anthropic (direct) or OpenRouter and enter an API key. This step can be skipped and configured later via the admin page
-3. **Apply** -- Fully automated configuration: creates Console + Grafana OAuth2 providers in Authentik, initializes OpenBao vault, generates Paperless API token, writes all credentials to `.env`, and restarts affected services. Progress streams in real-time via SSE
+| | |
+|---|---|
+| ![Step 1: Identity & Password](docs/images/setup-step1.png) | ![Step 2: AI Provider](docs/images/setup-step2.png) |
+| **Step 1:** Setup code, admin password, org identity | **Step 2:** Choose AI provider (optional, skip for later) |
+
+| |
+|---|
+| ![Step 3: Apply](docs/images/setup-step3.png) |
+| **Step 3:** Fully automated -- SSO providers, OpenBao, Paperless token, `.env`, restart |
 
 The wizard eliminates the most error-prone steps in new deployments: Authentik OAuth provider creation, OpenBao initialization, and Paperless token generation -- all fully automated. After completion, the wizard locks itself out (returns 403) and redirects to the login page with a 10-second countdown.
 
