@@ -1,52 +1,48 @@
 # Contributing to OperatorOne
 
-Thanks for your interest in contributing. This document covers the basics.
+Thanks for your interest in contributing! Here's how to get started.
 
 ## Getting Started
 
 1. Fork the repo and clone your fork
-2. Copy `.env.example` to `.env` and run `./scripts/generate-secrets.sh`
-3. Start the dev stack:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.dev.yml \
-     -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
-     -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
-     up -d
-   ```
-4. Access services at `*.localhost` (see README for URLs)
+2. Copy `.env.example` to `.env`
+3. Run `./scripts/start.sh` to generate secrets and start the stack
+4. Complete the setup wizard at `http://console.localhost`
 
-## Development Workflow
+See the [README](README.md) for detailed setup instructions.
+
+## Development
+
+```bash
+# Start the dev stack
+docker compose -f docker-compose.yml -f docker-compose.dev.yml \
+  -f modules/console/docker-compose.yml -f modules/console/docker-compose.dev.yml \
+  -f modules/admin/docker-compose.yml -f modules/admin/docker-compose.dev.yml \
+  -f modules/paperless/docker-compose.yml -f modules/paperless/docker-compose.dev.yml \
+  up -d
+```
+
+The console app supports hot reload via volume mounts in dev mode.
+
+## Pull Requests
 
 - Create a feature branch from `main`
-- Keep commits focused and descriptive
-- Test your changes locally with the full dev stack before submitting a PR
+- Keep PRs focused — one feature or fix per PR
+- Include a clear description of what changed and why
+- Make sure the dev stack starts cleanly with your changes
 
-## Project Structure
+## Reporting Bugs
 
-- **Core stack**: `docker-compose.yml` + environment-specific overrides
-- **Modules**: `modules/<name>/` with their own compose files layered via `-f`
-- **Console app**: `modules/console/app/` (Next.js 15, App Router)
-- **MCP servers**: `mcp-servers/` (Node.js)
-- **Scripts**: `scripts/` (bash utilities for ops tasks)
+Use the [bug report template](https://github.com/caseycapshaw/OperatorOne/issues/new?template=bug_report.md) when filing issues.
 
-## Conventions
+## Security
 
-- **Server Components** for data fetching, **Server Actions** for mutations
-- All database queries are org-scoped (multi-tenant)
-- Traefik routing via Docker labels, not config files
-- Dev overrides always set `tls=false` and use the `web` entrypoint
-- Secrets never committed to git
+Found a vulnerability? **Do not open a public issue.** Use [GitHub's private vulnerability reporting](https://github.com/caseycapshaw/OperatorOne/security/advisories/new) instead. See [SECURITY.md](SECURITY.md) for details.
 
-## Submitting Changes
+## Code of Conduct
 
-1. Open a pull request against `main`
-2. Describe what changed and why
-3. Include steps to test if the change affects runtime behavior
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold it.
 
-## Reporting Issues
+## License
 
-Open an issue on GitHub with:
-- What you expected to happen
-- What actually happened
-- Steps to reproduce
-- Relevant logs (redact any secrets)
+By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
