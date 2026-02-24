@@ -6,7 +6,7 @@ If you discover a security vulnerability, please report it responsibly.
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, email **security@operatorone.ai** with:
+Instead, use [GitHub's private vulnerability reporting](https://github.com/caseycapshaw/OperatorOne/security/advisories/new) to submit your report. Include:
 - A description of the vulnerability
 - Steps to reproduce
 - Potential impact
