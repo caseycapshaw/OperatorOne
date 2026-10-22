@@ -13,8 +13,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.41",
-    "@ai-sdk/react": "^3.0.80",
+    "@ai-sdk/anthropic": "^3.0.135",
+    "@ai-sdk/react": "^3.0.315",
     "@openrouter/ai-sdk-provider": "^2.2.3",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.4",
@@ -24,7 +24,7 @@
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
-    "ai": "^6.0.78",
+    "ai": "^6.0.312",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
